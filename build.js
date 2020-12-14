@@ -24,16 +24,23 @@ if(!existsSync(publicDirectory)) {
     mkdirSync(publicDirectory);
 }
 
-{
+const units = [
+    { source: 'main.cpp', object: 'main.o' },
+    { source: 'constraint_arithmetic.cpp', object: 'constraint_arithmetic.o' },
+    { source: 'solver.cpp', object: 'solver.o' },
+];
+
+for(const unit of units) {
     const { status, stderr } = spawnSync(
         'clang++',
         [
             '-c',
             `-O${config === 'debug' ? '0' : '2' }`,
             '--target=wasm32',
+            ...config === 'debug' ? ['-g'] : [],
             `-I${join(scriptPath, 'thirdparty')}`,
-            '-o', join(buildDirectory, 'main.o'),
-            join(sourceDirectory, 'main.cpp')
+            '-o', join(buildDirectory, unit.object),
+            join(sourceDirectory, unit.source)
         ]
     );
 
@@ -53,7 +60,7 @@ if(!existsSync(publicDirectory)) {
             '--import-memory',
             '--allow-undefined',
             '-o', join(publicDirectory, 'out.wasm'),
-            join(buildDirectory, 'main.o')
+            ...units.map(unit => join(buildDirectory, unit.object))
         ]
     );
 
