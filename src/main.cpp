@@ -87,6 +87,8 @@ inline float get_text_width(String text, String font_family, float font_size) {
     return get_text_width(text.text, text.length, font_family.text, font_family.length, font_size);
 }
 
+extern "C" void clear_controls();
+
 extern "C" Control* create_label(
     float x,
     float y,
@@ -124,6 +126,10 @@ static Control *solidify_label(Label label, ArithmeticContext context, Arithmeti
 }
 
 extern "C" void init() {
+
+}
+
+extern "C" void update() {
     ArithmeticContext context {};
 
     const auto width = 640.0f;
@@ -168,6 +174,8 @@ extern "C" void init() {
     label3.y == label1.y + -10;
 
     auto solution = solve_arithmetic_constraints(context, -(label1.x));
+
+    clear_controls();
 
     solidify_label(label1, context, solution);
     solidify_label(label2, context, solution);

@@ -11,6 +11,17 @@ function decodeString(data, length) {
 let nextControlId = 1;
 const controls = {};
 
+const container = document.createElement('div');
+container.style.position = 'absolute';
+
+document.body.appendChild(container);
+
+const textWidthStupidity = document.createElement('span');
+textWidthStupidity.style.visibility = 'hidden';
+textWidthStupidity.style.position = 'absolute';
+
+container.appendChild(textWidthStupidity);
+
 function environmentPanic() {
     throw new Error('panic!');
 }
@@ -20,38 +31,37 @@ function debugPrintFloat(value) {
 }
 
 function getTextWidth(textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
-    const tempElement = document.createElement('span');
+    textWidthStupidity.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
+    textWidthStupidity.style.fontSize = fontSize;
 
-    tempElement.style.visibility = 'hidden';
-    tempElement.style.position = 'absolute';
+    textWidthStupidity.innerHTML = decodeString(textData, textLength);
 
-    tempElement.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
-    tempElement.style.fontSize = fontSize;
-
-    tempElement.innerHTML = decodeString(textData, textLength);
-
-    document.body.appendChild(tempElement);
-
-    const width = tempElement.offsetWidth;
-
-    document.body.removeChild(tempElement);
+    const width = textWidthStupidity.offsetWidth;
 
     return width;
+}
+
+function clearControls() {
+    for(const id in controls) {
+        container.removeChild(controls[id]);
+
+        delete controls[id];
+    }
 }
 
 function createLabel(x, y, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
     const element = document.createElement('div');
     element.style.position = 'absolute';
 
-    element.style.left = x + "px";
-    element.style.top = y + "px";
+    element.style.left = x + 'px';
+    element.style.top = y + 'px';
 
     element.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
     element.style.fontSize = fontSize;
 
     element.innerHTML = decodeString(textData, textLength);
 
-    document.body.appendChild(element);
+    container.appendChild(element);
 
     const id = nextControlId;
 
@@ -66,8 +76,8 @@ function setPosition(controlId, x, y) {
     const element = controls[controlId];
 
     if(element !== undefined) {
-        element.style.left = x + "px";
-        element.style.top = y + "px";
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
     }
 }
 
@@ -78,6 +88,7 @@ fetch('./out.wasm')
             environment_panic: environmentPanic,
             debug_print_float: debugPrintFloat,
             get_text_width: getTextWidth,
+            clear_controls: clearControls,
             create_label: createLabel,
             set_position: setPosition
         };
@@ -86,10 +97,19 @@ fetch('./out.wasm')
     })
     .then(result => {
         const {
-            init
+            init,
+            update
         } = result.instance.exports;
 
         init();
+
+        function frame() {
+            update();
+
+            requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
     })
     .catch(err => {
         console.error(err);
