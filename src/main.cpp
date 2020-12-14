@@ -183,3 +183,11 @@ extern "C" void update() {
 
     clear_allocator();
 }
+
+extern "C" void *memset(void *pointer, int value, size_t count) {
+    for(size_t i = 0; i < count; i += 1) {
+        ((uint8_t*)pointer)[i] = (uint8_t)value;
+    }
+
+    return pointer;
+}
