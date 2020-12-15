@@ -15,6 +15,8 @@ add_custom_target(
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm/index.html"
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm/index.js"
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm/index.css"
+    "${CMAKE_CURRENT_BINARY_DIR}/examples/wasm/index.css"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/wasm_browser/controls.js"
     "${CMAKE_CURRENT_BINARY_DIR}/examples/wasm"
 )
 

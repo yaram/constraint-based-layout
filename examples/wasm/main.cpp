@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "environment.h"
 #include "constraint_arithmetic.h"
+#include "controls.h"
 
 const size_t max_allocator_space = 4096;
 
@@ -69,26 +70,6 @@ static String operator ""_S(const char *data, size_t length) {
     };
 }
 
-struct Control;
-
-extern "C" float get_text_width(const char* text_data, size_t text_length, const char* font_family_data, size_t font_family_length, float font_size);
-
-inline float get_text_width(String text, String font_family, float font_size) {
-    return get_text_width(text.data, text.length, font_family.data, font_family.length, font_size);
-}
-
-extern "C" void clear_controls();
-
-extern "C" Control* create_label(
-    float x,
-    float y,
-    const char* text_data,
-    size_t text_length,
-    const char* font_family_data,
-    size_t font_family_length,
-    float font_size
-);
-
 struct Label {
     ArithmeticVariable x;
     ArithmeticVariable y;
@@ -99,7 +80,11 @@ struct Label {
     float font_size;
 };
 
-static Control *solidify_label(Label label, ArithmeticContext context, ArithmeticSolution solution) {
+inline float get_label_width(Label label) {
+    return get_label_width(label.text.data, label.text.length, label.font_family.data, label.font_family.length, label.font_size);
+}
+
+static control_t *solidify_label(Label label, ArithmeticContext context, ArithmeticSolution solution) {
     return create_label(
         get_arithmetic_variable_value(context, solution, label.x),
         get_arithmetic_variable_value(context, solution, label.y),
@@ -125,27 +110,27 @@ extern "C" void init() {
         20
     };
 
-    auto label1_width = get_text_width(label1.text, label1.font_family, label1.font_size);
+    auto label1_width = get_label_width(label1);
 
     Label label2 {
         create_new_variable(&context),
         create_new_variable(&context),
         "Test2"_S,
         "sans-serif"_S,
-        20
+        30
     };
 
-    auto label2_width = get_text_width(label2.text, label2.font_family, label2.font_size);
+    auto label2_width = get_label_width(label2);
 
     Label label3 {
         create_new_variable(&context),
         create_new_variable(&context),
         "Test3"_S,
         "sans-serif"_S,
-        20
+        40
     };
 
-    auto label3_width = get_text_width(label3.text, label3.font_family, label3.font_size);
+    auto label3_width = get_label_width(label3);
 
     label1.x <= width - label1_width;
     label1.y + label1.font_size / 2 == height / 2;
@@ -153,7 +138,7 @@ extern "C" void init() {
     label2.y == height - label2.font_size;
 
     label3.x == label1.x + -label3_width;
-    label3.y == label1.y + -10;
+    label3.y + label3.font_size / 2 == label1.y + label1.font_size / 2;
 
     auto solution = solve_arithmetic_constraints(context, -(label1.x));
 
