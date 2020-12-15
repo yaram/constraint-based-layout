@@ -1,7 +1,7 @@
 #include "solver.h"
 
-void substitute(size_t variable_count, float *constant, float *coefficients, size_t variable, float new_constant, const float *new_coefficients) {
-    auto multiplyer = coefficients[variable];
+static void substitute(size_t variable_count, float *constant, float *coefficients, size_t variable, float new_constant, const float *new_coefficients) {
+    float multiplyer = coefficients[variable];
     coefficients[variable] = 0.0f;
 
     *constant += new_constant * multiplyer;
@@ -23,9 +23,77 @@ bool solve(
     float *constraint_constants,
     float *constraint_coefficients
 ) {
+    // Transform constraints and objective into augmented simplex form
+    for(size_t i = 0; i < constraint_count; i += 1) {
+        bool no_variables = true;
+        size_t variable_index;
+
+        for(size_t j = 0; j < variable_count; j += 1) {
+            if(is_variable_external[j] && constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
+                no_variables = false;
+                variable_index = j;
+
+                break;
+            }
+        }
+
+        if(no_variables) {
+            for(size_t j = 0; j < variable_count; j += 1) {
+                if(constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
+                    no_variables = false;
+                    variable_index = j;
+
+                    break;
+                }
+            }
+        }
+
+        if(no_variables) {
+            return false;
+        }
+
+        constraint_variable_indices[i] = variable_index;
+
+        float coefficient = -constraint_coefficients[coefficient_index(i, variable_index)];
+        constraint_coefficients[coefficient_index(i, variable_index)] = 0.0f;
+
+        float reciprocal_coefficient = 1.0f / coefficient;
+
+        constraint_constants[i] *= reciprocal_coefficient;
+
+        for(size_t j = 0; j < variable_count; j += 1) {
+            if(j != variable_index) {
+                constraint_coefficients[coefficient_index(i, j)] *= reciprocal_coefficient;
+            }
+        }
+
+        substitute(
+            variable_count,
+            objective_constant,
+            objective_coefficients,
+            variable_index,
+            constraint_constants[i],
+            &constraint_coefficients[i * variable_count]
+        );
+
+        for(size_t j = 0; j < constraint_count; j += 1) {
+            if(j != i) {
+                substitute(
+                    variable_count,
+                    &constraint_constants[j],
+                    &constraint_coefficients[j * variable_count],
+                    variable_index,
+                    constraint_constants[i],
+                    &constraint_coefficients[i * variable_count]
+                );
+            }
+        }
+    }
+
+    // Minimise objective
     while(true) {
         // Choose non-basic parameter to become basic
-        auto all_basic = true;
+        bool all_basic = true;
         size_t parameter_index;
 
         for(size_t i = 0; i < variable_count; i += 1) {
@@ -42,19 +110,19 @@ bool solve(
         }
 
         // Choose basic slack variable to become non-basic
-        auto first = true;
+        bool first = true;
         float minimum_ratio;
         size_t constraint_index;
         size_t dummy_index;
 
         for(size_t i = 0; i < constraint_count; i += 1) {
-            auto variable_index = constraint_variable_indices[i];
+            size_t variable_index = constraint_variable_indices[i];
 
             if(!is_variable_external[variable_index]) {
-                auto coefficient = constraint_coefficients[coefficient_index(i, parameter_index)];
+                float coefficient = constraint_coefficients[coefficient_index(i, parameter_index)];
 
                 if(coefficient < 0.0f) {
-                    auto ratio = -constraint_constants[i] / coefficient;
+                    float ratio = -constraint_constants[i] / coefficient;
 
                     if(first || ratio < minimum_ratio) {
                         minimum_ratio = ratio;
@@ -74,7 +142,7 @@ bool solve(
         // Pivot parameter into basis and dummy out of basis
 
         // Change subject of constraint from dummy to parameter
-        auto reciprocal_coefficient = 1.0f / constraint_coefficients[coefficient_index(constraint_index, parameter_index)];
+        float reciprocal_coefficient = 1.0f / constraint_coefficients[coefficient_index(constraint_index, parameter_index)];
 
         constraint_variable_indices[constraint_index] = parameter_index;
 

@@ -54,8 +54,6 @@ void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality i
 
             left.coefficients[slack_variable] = -1.0f;
         } break;
-
-        default: panic();
     }
 
     auto constraint_index = context->constraint_count;
@@ -78,10 +76,6 @@ void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality i
 }
 
 ArithmeticExpression operator+(ArithmeticExpression a, ArithmeticExpression b) {
-    if(a.context != b.context) {
-        panic();
-    }
-
     auto context = a.context;
 
     size_t coefficient_count;
@@ -115,10 +109,6 @@ ArithmeticExpression operator+(ArithmeticExpression a, ArithmeticExpression b) {
 }
 
 ArithmeticExpression operator+(ArithmeticTerm a, ArithmeticTerm b) {
-    if(a.context != b.context) {
-        panic();
-    }
-
     auto context = a.context;
 
     auto coefficients = (float*)allocate(context->variable_count * sizeof(float));
@@ -174,10 +164,6 @@ ArithmeticTerm::operator ArithmeticExpression() {
 }
 
 ArithmeticExpression operator+(ArithmeticExpression expression, ArithmeticTerm term) {
-    if(expression.context != term.context) {
-        panic();
-    }
-
     auto context = expression.context;
 
     if(term.variable_index >= expression.coefficient_count) {
@@ -234,8 +220,6 @@ ArithmeticExpression arithmetic_variable_to_expression(ArithmeticVariable variab
 }
 
 ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, ArithmeticExpression objective) {
-    // Transform constraints and objective into augmented simplex form
-
     // Create full-sized tableau
     auto variable_count = context.variable_count;
 
@@ -283,74 +267,7 @@ ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, Arith
 
     deallocate(context.constraints);
 
-    // Perform actual transformation
     auto constraint_variable_indices = (size_t*)allocate(constraint_count * sizeof(size_t));
-
-    for(size_t i = 0; i < constraint_count; i += 1) {
-        auto no_variables = true;
-        size_t variable_index;
-
-        for(size_t j = 0; j < variable_count; j += 1) {
-            if(is_variable_external[j] && constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
-                no_variables = false;
-                variable_index = j;
-
-                break;
-            }
-        }
-
-        if(no_variables) {
-            for(size_t j = 0; j < variable_count; j += 1) {
-                if(constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
-                    no_variables = false;
-                    variable_index = j;
-
-                    break;
-                }
-            }
-        }
-
-        if(no_variables) {
-            panic();
-        }
-
-        constraint_variable_indices[i] = variable_index;
-
-        auto coefficient = -constraint_coefficients[coefficient_index(i, variable_index)];
-        constraint_coefficients[coefficient_index(i, variable_index)] = 0.0f;
-
-        auto reciprocal_coefficient = 1.0f / coefficient;
-
-        constraint_constants[i] *= reciprocal_coefficient;
-
-        for(size_t j = 0; j < variable_count; j += 1) {
-            if(j != variable_index) {
-                constraint_coefficients[coefficient_index(i, j)] *= reciprocal_coefficient;
-            }
-        }
-
-        substitute(
-            variable_count,
-            &objective_constant,
-            objective_coefficients,
-            variable_index,
-            constraint_constants[i],
-            &constraint_coefficients[i * variable_count]
-        );
-
-        for(size_t j = 0; j < constraint_count; j += 1) {
-            if(j != i) {
-                substitute(
-                    variable_count,
-                    &constraint_constants[j],
-                    &constraint_coefficients[j * variable_count],
-                    variable_index,
-                    constraint_constants[i],
-                    &constraint_coefficients[i * variable_count]
-                );
-            }
-        }
-    }
 
     solve(
         variable_count,

@@ -3,14 +3,6 @@
 #include "environment.h"
 #include "constraint_arithmetic.h"
 
-extern "C" void environment_panic();
-
-[[noreturn]] void panic() {
-    while(true) {
-        environment_panic();
-    }
-}
-
 const size_t max_allocator_space = 4096;
 
 size_t next_allocation_start = 0;
@@ -66,7 +58,7 @@ void deallocate(void *pointer) {
 }
 
 struct String {
-    const char *text;
+    const char *data;
     size_t length;
 };
 
@@ -79,12 +71,10 @@ static String operator ""_S(const char *data, size_t length) {
 
 struct Control;
 
-extern "C" void environment_panic();
-
 extern "C" float get_text_width(const char* text_data, size_t text_length, const char* font_family_data, size_t font_family_length, float font_size);
 
 inline float get_text_width(String text, String font_family, float font_size) {
-    return get_text_width(text.text, text.length, font_family.text, font_family.length, font_size);
+    return get_text_width(text.data, text.length, font_family.data, font_family.length, font_size);
 }
 
 extern "C" void clear_controls();
@@ -98,12 +88,6 @@ extern "C" Control* create_label(
     size_t font_family_length,
     float font_size
 );
-
-inline Control* create_label(float x, float y, String text, String font_family, float font_size) {
-    return create_label(x, y, text.text, text.length, font_family.text, font_family.length, font_size);
-}
-
-extern "C" void set_position(Control *control, float x, float y);
 
 struct Label {
     ArithmeticVariable x;
@@ -119,17 +103,15 @@ static Control *solidify_label(Label label, ArithmeticContext context, Arithmeti
     return create_label(
         get_arithmetic_variable_value(context, solution, label.x),
         get_arithmetic_variable_value(context, solution, label.y),
-        label.text,
-        label.font_family,
+        label.text.data,
+        label.text.length,
+        label.font_family.data,
+        label.font_family.length,
         label.font_size
     );
 }
 
 extern "C" void init() {
-
-}
-
-extern "C" void update() {
     ArithmeticContext context {};
 
     const auto width = 640.0f;

@@ -22,10 +22,6 @@ textWidthStupidity.style.position = 'absolute';
 
 container.appendChild(textWidthStupidity);
 
-function environmentPanic() {
-    throw new Error('panic!');
-}
-
 function debugPrintFloat(value) {
     console.log(value);
 }
@@ -81,11 +77,10 @@ function setPosition(controlId, x, y) {
     }
 }
 
-fetch('./out.wasm')
+fetch('./example.wasm')
     .then(response => {
         const environment = {
             memory,
-            environment_panic: environmentPanic,
             debug_print_float: debugPrintFloat,
             get_text_width: getTextWidth,
             clear_controls: clearControls,
@@ -97,19 +92,10 @@ fetch('./out.wasm')
     })
     .then(result => {
         const {
-            init,
-            update
+            init
         } = result.instance.exports;
 
         init();
-
-        function frame() {
-            update();
-
-            requestAnimationFrame(frame);
-        }
-
-        requestAnimationFrame(frame);
     })
     .catch(err => {
         console.error(err);

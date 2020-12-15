@@ -1,10 +1,13 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
+#include <stdbool.h>
 
 #define coefficient_index(constraint_index, variable_index) ((constraint_index) * variable_count + (variable_index))
-
-void substitute(size_t variable_count, float *constant, float *coefficients, size_t variable, float new_constant, const float *new_coefficients);
 
 bool solve(
     size_t variable_count,
@@ -16,3 +19,7 @@ bool solve(
     float *constraint_constants,
     float *constraint_coefficients
 );
+
+#ifdef __cplusplus
+}
+#endif
