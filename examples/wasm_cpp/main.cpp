@@ -80,8 +80,28 @@ struct Label {
     float font_size;
 };
 
-inline float get_label_width(Label label) {
-    return get_label_width(label.text.data, label.text.length, label.font_family.data, label.font_family.length, label.font_size);
+struct Size {
+    float width;
+    float height;
+};
+
+inline Size get_label_size(Label label) {
+    float width;
+    float height;
+    get_label_size(
+        label.text.data,
+        label.text.length,
+        label.font_family.data,
+        label.font_family.length,
+        label.font_size,
+        &width,
+        &height
+    );
+
+    return {
+        width,
+        height
+    };
 }
 
 static control_t *solidify_label(Label label, ArithmeticContext context, ArithmeticSolution solution) {
@@ -110,7 +130,7 @@ extern "C" void init() {
         20
     };
 
-    auto label1_width = get_label_width(label1);
+    auto label1_size = get_label_size(label1);
 
     Label label2 {
         create_new_variable(&context),
@@ -120,7 +140,7 @@ extern "C" void init() {
         30
     };
 
-    auto label2_width = get_label_width(label2);
+    auto label2_size = get_label_size(label2);
 
     Label label3 {
         create_new_variable(&context),
@@ -130,15 +150,15 @@ extern "C" void init() {
         40
     };
 
-    auto label3_width = get_label_width(label3);
+    auto label3_size = get_label_size(label3);
 
-    label1.x <= width - label1_width;
-    label1.y + label1.font_size / 2 == height / 2;
+    label1.x <= width - label1_size.width;
+    label1.y + label1_size.height / 2 == height / 2;
 
-    label2.y == height - label2.font_size;
+    label2.y == height - label2_size.height;
 
-    label3.x == label1.x + -label3_width;
-    label3.y + label3.font_size / 2 == label1.y + label1.font_size / 2;
+    label3.x == label1.x + -label3_size.width;
+    label3.y + label3_size.height / 2 == label1.y + label1_size.height / 2;
 
     auto solution = solve_arithmetic_constraints(context, -(label1.x));
 

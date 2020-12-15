@@ -20,7 +20,15 @@ control_t* create_label(
     float font_size
 );
 
-float get_label_width(const char* text_data, size_t text_length, const char* font_family_data, size_t font_family_length, float font_size);
+void get_label_size(
+    const char* text_data,
+    size_t text_length,
+    const char* font_family_data,
+    size_t font_family_length,
+    float font_size,
+    float *width,
+    float *height
+);
 
 #ifdef __cplusplus
 }
