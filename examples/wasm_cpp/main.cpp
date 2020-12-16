@@ -214,7 +214,7 @@ void render() {
     auto increment_button_text_width = get_text_width(increment_button.text, increment_button.font_family, increment_button.font_size);
     auto increment_button_text_height = increment_button.font_size;
 
-    increment_button.width == increment_button_text_width + 8 * 2;
+    increment_button.width <= frame_size.width / 2;
     increment_button.height == increment_button_text_height + 8 * 2;
 
     count_label.x + count_label_width / 2 == increment_button.x + increment_button.width * 0.5f;
@@ -224,7 +224,7 @@ void render() {
 
     increment_button.y - (increment_button.y - (count_label.y + count_label_height)) * 0.5 == frame_size.height / 2;
 
-    auto solution = solve_arithmetic_constraints(context, -(count_label.x));
+    auto solution = solve_arithmetic_constraints(context, -(increment_button.width));
 
     clear_controls();
 
