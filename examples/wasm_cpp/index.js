@@ -5,7 +5,9 @@ container.style.position = 'absolute';
 
 document.body.appendChild(container);
 
-const controls_environment = initControls(memory, container);
+let buttonPressHandler;
+
+const controlsEnvironment = initControls(memory, container, id => buttonPressHandler(id));
 
 function debugPrintFloat(value) {
     console.log(value);
@@ -15,7 +17,7 @@ fetch('./example.wasm')
     .then(response => {
         const environment = {
             memory,
-            ...controls_environment,
+            ...controlsEnvironment,
             debug_print_float: debugPrintFloat
         };
 
@@ -23,8 +25,11 @@ fetch('./example.wasm')
     })
     .then(result => {
         const {
-            init
+            init,
+            button_press_handler
         } = result.instance.exports;
+
+        buttonPressHandler = button_press_handler;
 
         init();
     })

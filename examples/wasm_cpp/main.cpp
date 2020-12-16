@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "debug.h"
 #include "environment.h"
 #include "constraint_arithmetic.h"
 #include "controls.h"
@@ -80,20 +81,30 @@ struct Label {
     float font_size;
 };
 
+static Label create_label(ArithmeticContext *context, String text, String font_family, float font_size) {
+    return {
+        create_new_variable(context),
+        create_new_variable(context),
+        text,
+        font_family,
+        font_size
+    };
+}
+
 struct Size {
     float width;
     float height;
 };
 
-inline Size get_label_size(Label label) {
+inline Size get_text_size(String text, String font_family, float font_size) {
     float width;
     float height;
-    get_label_size(
-        label.text.data,
-        label.text.length,
-        label.font_family.data,
-        label.font_family.length,
-        label.font_size,
+    get_text_size(
+        text.data,
+        text.length,
+        font_family.data,
+        font_family.length,
+        font_size,
         &width,
         &height
     );
@@ -116,57 +127,116 @@ static control_t *solidify_label(Label label, ArithmeticContext context, Arithme
     );
 }
 
-extern "C" void init() {
+struct Button {
+    ArithmeticVariable x;
+    ArithmeticVariable y;
+
+    ArithmeticVariable width;
+    ArithmeticVariable height;
+
+    String text;
+
+    String font_family;
+    float font_size;
+};
+
+static Button create_button(ArithmeticContext *context, String text, String font_family, float font_size) {
+    return {
+        create_new_variable(context),
+        create_new_variable(context),
+        create_new_variable(context),
+        create_new_variable(context),
+        text,
+        font_family,
+        font_size
+    };
+}
+
+static control_t *solidify_button(Button button, ArithmeticContext context, ArithmeticSolution solution) {
+    return create_button(
+        get_arithmetic_variable_value(context, solution, button.x),
+        get_arithmetic_variable_value(context, solution, button.y),
+        get_arithmetic_variable_value(context, solution, button.width),
+        get_arithmetic_variable_value(context, solution, button.height),
+        button.text.data,
+        button.text.length,
+        button.font_family.data,
+        button.font_family.length,
+        button.font_size
+    );
+}
+
+unsigned int count = 0;
+
+static size_t uint_to_string(unsigned int value, char *buffer, unsigned int radix = 10) {
+    if(value == 0) {
+        buffer[0] = '0';
+
+        return 1;
+    }
+
+    size_t length = 0;
+
+    const char digits[] = "0123456789ABCDEF";
+
+    while(value != 0) {
+        buffer[length] = digits[value % radix];
+
+        value /= radix;
+
+        length += 1;
+    }
+
+    for(size_t i = 0; i < length / 2; i += 1) {
+        auto temp = buffer[i];
+        buffer[i] = buffer[length - 1 - i];
+        buffer[length - 1 - i] = temp;
+    }
+
+    return length;
+}
+
+void render() {
     ArithmeticContext context {};
 
     const auto width = 640.0f;
     const auto height = 480.0f;
 
-    Label label1 {
-        create_new_variable(&context),
-        create_new_variable(&context),
-        "Test"_S,
-        "sans-serif"_S,
-        20
-    };
+    char count_string[32];
+    auto count_string_length = uint_to_string(count, count_string);
 
-    auto label1_size = get_label_size(label1);
+    auto count_label = create_label(&context, { count_string, count_string_length }, "sans-serif"_S, 20);
+    auto count_label_size = get_text_size(count_label.text, count_label.font_family, count_label.font_size);
 
-    Label label2 {
-        create_new_variable(&context),
-        create_new_variable(&context),
-        "Test2"_S,
-        "sans-serif"_S,
-        30
-    };
+    auto increment_button = create_button(&context, "Increment"_S, "sans-serif"_S, 20);
+    auto increment_button_text_size = get_text_size(increment_button.text, increment_button.font_family, increment_button.font_size);
+    increment_button.width == increment_button_text_size.width + 8 * 2;
+    increment_button.height == increment_button_text_size.height + 8 * 2;
 
-    auto label2_size = get_label_size(label2);
+    increment_button.x + increment_button.width * 0.5f == width / 2;
+    increment_button.y + increment_button.height * 0.5f == height / 2;
 
-    Label label3 {
-        create_new_variable(&context),
-        create_new_variable(&context),
-        "Test3"_S,
-        "sans-serif"_S,
-        40
-    };
+    count_label.x + count_label_size.width / 2 == increment_button.x + increment_button.width * 0.5f;
+    count_label.y + count_label_size.height == increment_button.y + -8;
 
-    auto label3_size = get_label_size(label3);
-
-    label1.x <= width - label1_size.width;
-    label1.y + label1_size.height / 2 == height / 2;
-
-    label2.y == height - label2_size.height;
-
-    label3.x == label1.x + -label3_size.width;
-    label3.y + label3_size.height / 2 == label1.y + label1_size.height / 2;
-
-    auto solution = solve_arithmetic_constraints(context, -(label1.x));
+    auto solution = solve_arithmetic_constraints(context, -(count_label.x));
 
     clear_controls();
 
-    solidify_label(label1, context, solution);
-    solidify_label(label2, context, solution);
-    solidify_label(label3, context, solution);
+    solidify_label(count_label, context, solution);
+    solidify_button(increment_button, context, solution);
+}
+
+extern "C" void init() {
+    render();
+
+    clear_allocator();
+}
+
+extern "C" void button_press_handler(control_t *button) {
+    count += 1;
+
+    render();
 
     clear_allocator();
 }
