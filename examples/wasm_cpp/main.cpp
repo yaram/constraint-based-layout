@@ -115,6 +115,17 @@ inline Size get_text_size(String text, String font_family, float font_size) {
     };
 }
 
+inline Size get_frame_size() {
+    float width;
+    float height;
+    get_frame_size(&width, &height);
+
+    return {
+        width,
+        height
+    };
+}
+
 static control_t *solidify_label(Label label, ArithmeticContext context, ArithmeticSolution solution) {
     return create_label(
         get_arithmetic_variable_value(context, solution, label.x),
@@ -199,8 +210,7 @@ static size_t uint_to_string(unsigned int value, char *buffer, unsigned int radi
 void render() {
     ArithmeticContext context {};
 
-    const auto width = 640.0f;
-    const auto height = 480.0f;
+    auto frame_size = get_frame_size();
 
     char count_string[32];
     auto count_string_length = uint_to_string(count, count_string);
@@ -213,8 +223,8 @@ void render() {
     increment_button.width == increment_button_text_size.width + 8 * 2;
     increment_button.height == increment_button_text_size.height + 8 * 2;
 
-    increment_button.x + increment_button.width * 0.5f == width / 2;
-    increment_button.y + increment_button.height * 0.5f == height / 2;
+    increment_button.x + increment_button.width * 0.5f == frame_size.width / 2;
+    increment_button.y + increment_button.height * 0.5f == frame_size.height / 2;
 
     count_label.x + count_label_size.width / 2 == increment_button.x + increment_button.width * 0.5f;
     count_label.y + count_label_size.height == increment_button.y + -8;
@@ -236,6 +246,12 @@ extern "C" void init() {
 extern "C" void button_press_handler(control_t *button) {
     count += 1;
 
+    render();
+
+    clear_allocator();
+}
+
+extern "C" void frame_resize_handler() {
     render();
 
     clear_allocator();
