@@ -96,23 +96,14 @@ struct Size {
     float height;
 };
 
-inline Size get_text_size(String text, String font_family, float font_size) {
-    float width;
-    float height;
-    get_text_size(
+inline float get_text_width(String text, String font_family, float font_size) {
+    return get_text_width(
         text.data,
         text.length,
         font_family.data,
         font_family.length,
-        font_size,
-        &width,
-        &height
+        font_size
     );
-
-    return {
-        width,
-        height
-    };
 }
 
 inline Size get_frame_size() {
@@ -216,18 +207,20 @@ void render() {
     auto count_string_length = uint_to_string(count, count_string);
 
     auto count_label = create_label(&context, { count_string, count_string_length }, "sans-serif"_S, 20);
-    auto count_label_size = get_text_size(count_label.text, count_label.font_family, count_label.font_size);
+    auto count_label_width = get_text_width(count_label.text, count_label.font_family, count_label.font_size);
+    auto count_label_height = count_label.font_size;
 
     auto increment_button = create_button(&context, "Increment"_S, "sans-serif"_S, 20);
-    auto increment_button_text_size = get_text_size(increment_button.text, increment_button.font_family, increment_button.font_size);
-    increment_button.width == increment_button_text_size.width + 8 * 2;
-    increment_button.height == increment_button_text_size.height + 8 * 2;
+    auto increment_button_text_width = get_text_width(increment_button.text, increment_button.font_family, increment_button.font_size);
+    auto increment_button_text_height = increment_button.font_size;
+    increment_button.width == increment_button_text_width + 8 * 2;
+    increment_button.height == increment_button_text_height + 8 * 2;
 
     increment_button.x + increment_button.width * 0.5f == frame_size.width / 2;
     increment_button.y + increment_button.height * 0.5f == frame_size.height / 2;
 
-    count_label.x + count_label_size.width / 2 == increment_button.x + increment_button.width * 0.5f;
-    count_label.y + count_label_size.height == increment_button.y + -8;
+    count_label.x + count_label_width / 2 == increment_button.x + increment_button.width * 0.5f;
+    count_label.y + count_label_height == increment_button.y + -8;
 
     auto solution = solve_arithmetic_constraints(context, -(count_label.x));
 

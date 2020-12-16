@@ -8,14 +8,12 @@ extern "C" {
 
 typedef struct _control_t control_t;
 
-void get_text_size(
+float get_text_width(
     const char* text_data,
     size_t text_length,
     const char* font_family_data,
     size_t font_family_length,
-    float font_size,
-    float *width,
-    float *height
+    float font_size
 );
 
 void get_frame_size(float *width, float *height);
