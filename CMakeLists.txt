@@ -15,7 +15,6 @@ add_custom_target(
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm_cpp/index.html"
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm_cpp/index.js"
     "${CMAKE_CURRENT_SOURCE_DIR}/examples/wasm_cpp/index.css"
-    "${CMAKE_CURRENT_BINARY_DIR}/examples/wasm_cpp/index.css"
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/wasm_browser/controls.js"
     "${CMAKE_CURRENT_BINARY_DIR}/examples/wasm_cpp"
 )
@@ -25,5 +24,5 @@ set_target_properties(example_wasm_cpp PROPERTIES SUFFIX .wasm)
 set_target_properties(example_wasm_cpp PROPERTIES OUTPUT_NAME "example")
 set_target_properties(example_wasm_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/examples/wasm_cpp")
 target_link_libraries(example_wasm_cpp PRIVATE constraint_arithmetic)
-target_link_options(example_wasm_cpp PRIVATE "-Wl,--export=init,--export=button_press_handler,--export=frame_resize_handler")
+target_link_options(example_wasm_cpp PRIVATE "-Wl,--export=init,--export=button_press_handler,--export=frame_resize_handler,--export=text_input_change_handler")
 add_dependencies(example_wasm_cpp example_wasm_cpp_copy)

@@ -168,6 +168,45 @@ static control_t *solidify_button(Button button, ArithmeticContext context, Arit
     );
 }
 
+struct TextInput {
+    ArithmeticVariable x;
+    ArithmeticVariable y;
+
+    ArithmeticVariable width;
+    ArithmeticVariable height;
+
+    String text;
+
+    String font_family;
+    float font_size;
+};
+
+static TextInput create_text_input(ArithmeticContext *context, String text, String font_family, float font_size) {
+    return {
+        create_new_variable(context),
+        create_new_variable(context),
+        create_new_variable(context),
+        create_new_variable(context),
+        text,
+        font_family,
+        font_size
+    };
+}
+
+static control_t *solidify_text_input(TextInput text_input, ArithmeticContext context, ArithmeticSolution solution) {
+    return create_text_input(
+        get_arithmetic_variable_value(context, solution, text_input.x),
+        get_arithmetic_variable_value(context, solution, text_input.y),
+        get_arithmetic_variable_value(context, solution, text_input.width),
+        get_arithmetic_variable_value(context, solution, text_input.height),
+        text_input.text.data,
+        text_input.text.length,
+        text_input.font_family.data,
+        text_input.font_family.length,
+        text_input.font_size
+    );
+}
+
 unsigned int count = 0;
 
 static size_t uint_to_string(unsigned int value, char *buffer, unsigned int radix = 10) {
@@ -198,6 +237,10 @@ static size_t uint_to_string(unsigned int value, char *buffer, unsigned int radi
     return length;
 }
 
+const size_t test_text_max_length = 32;
+char test_text_buffer[test_text_max_length];
+size_t test_text_length = 0;
+
 void render() {
     ArithmeticContext context {};
 
@@ -205,6 +248,10 @@ void render() {
 
     char count_string[32];
     auto count_string_length = uint_to_string(count, count_string);
+
+    auto test_label = create_label(&context, { test_text_buffer, test_text_length }, "sans-serif"_S, 20);
+    auto test_label_width = get_text_width(test_label.text, test_label.font_family, test_label.font_size);
+    auto test_label_height = test_label.font_size;
 
     auto count_label = create_label(&context, { count_string, count_string_length }, "sans-serif"_S, 20);
     auto count_label_width = get_text_width(count_label.text, count_label.font_family, count_label.font_size);
@@ -214,22 +261,36 @@ void render() {
     auto increment_button_text_width = get_text_width(increment_button.text, increment_button.font_family, increment_button.font_size);
     auto increment_button_text_height = increment_button.font_size;
 
+    auto test_text_input = create_text_input(&context, { test_text_buffer, test_text_length }, "sans-serif"_S, 20);
+    auto test_text_input_text_height = test_text_input.font_size;
+
+    test_text_input.width == frame_size.width / 3;
+    test_text_input.height == test_text_input_text_height + 8 * 2;
+
+    test_text_input.x + test_text_input.width * 0.5f == increment_button.x + increment_button.width * 0.5f;
+    test_text_input.y == increment_button.y + increment_button.height + 8;
+
     increment_button.width <= frame_size.width / 2;
     increment_button.height == increment_button_text_height + 8 * 2;
 
     count_label.x + count_label_width / 2 == increment_button.x + increment_button.width * 0.5f;
     count_label.y + count_label_height == increment_button.y + -8;
 
+    test_label.x + test_label_width / 2 == count_label.x + count_label_width * 0.5f;
+    test_label.y + test_label_height == count_label.y + -8;
+
     increment_button.x + increment_button.width * 0.5 == frame_size.width / 2;
 
     increment_button.y - (increment_button.y - (count_label.y + count_label_height)) * 0.5 == frame_size.height / 2;
 
-    auto solution = solve_arithmetic_constraints(context, -(increment_button.width));
+    auto solution = solve_arithmetic_constraints(context, { &context, 0.0f, 0, nullptr });
 
     clear_controls();
 
+    solidify_label(test_label, context, solution);
     solidify_label(count_label, context, solution);
     solidify_button(increment_button, context, solution);
+    solidify_text_input(test_text_input, context, solution);
 }
 
 extern "C" void init() {
@@ -247,6 +308,18 @@ extern "C" void button_press_handler(control_t *button) {
 }
 
 extern "C" void frame_resize_handler() {
+    render();
+
+    clear_allocator();
+}
+
+extern "C" void text_input_change_handler(control_t *text_input) {    
+
+    auto text_length = get_text_input_text(text_input, test_text_buffer, test_text_max_length);
+    if(text_length <= test_text_max_length) {
+        test_text_length = text_length;
+    }
+
     render();
 
     clear_allocator();
