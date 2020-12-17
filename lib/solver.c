@@ -49,7 +49,9 @@ bool solve(
         }
 
         if(no_variables) {
-            return false;
+            constraint_variable_indices[i] = -1;
+
+            continue;
         }
 
         constraint_variable_indices[i] = variable_index;
@@ -118,7 +120,7 @@ bool solve(
         for(size_t i = 0; i < constraint_count; i += 1) {
             size_t variable_index = constraint_variable_indices[i];
 
-            if(!is_variable_external[variable_index]) {
+            if(variable_index != -1 && !is_variable_external[variable_index]) {
                 float coefficient = constraint_coefficients[coefficient_index(i, parameter_index)];
 
                 if(coefficient < 0.0f) {
