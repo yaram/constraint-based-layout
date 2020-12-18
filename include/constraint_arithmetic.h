@@ -3,6 +3,17 @@
 #include <stddef.h>
 #include "solver.h"
 
+struct ArithmeticContext;
+
+struct ArithmeticExpression {
+    ArithmeticContext *context;
+
+    float constant;
+
+    size_t coefficient_count;
+    float *coefficients;
+};
+
 struct ArithmeticContext {
     size_t variable_count;
     bool *is_variable_external;
@@ -21,15 +32,11 @@ struct ArithmeticContext {
 
     size_t constraint_count;
     ArithmeticConstraint *constraints;
-};
 
-struct ArithmeticExpression {
-    ArithmeticContext *context;
+    ArithmeticExpression objective;
 
-    float constant;
-
-    size_t coefficient_count;
-    float *coefficients;
+    size_t *solution_variable_indices;
+    float *solution_constants;
 };
 
 enum struct ArithmeticInequality {
@@ -293,12 +300,18 @@ inline void operator>=(ArithmeticVariable left, ArithmeticExpression right) {
     left_expression >= right;
 }
 
-struct ArithmeticSolution {
-    size_t *constraint_variable_indices;
+void solve_arithmetic_constraints(ArithmeticContext *context);
 
-    float *constraint_constants;
-};
+float get_arithmetic_variable_value(ArithmeticVariable variable);
 
-ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, ArithmeticExpression objective);
+void arithmetic_minimize(ArithmeticExpression expression);
 
-float get_arithmetic_variable_value(ArithmeticContext context, ArithmeticSolution solution, ArithmeticVariable variable);
+void arithmetic_maximize(ArithmeticExpression expression);
+
+inline void arithmetic_minimize(ArithmeticTerm term) {
+    arithmetic_minimize((ArithmeticExpression)term);
+}
+
+inline void arithmetic_maximize(ArithmeticTerm term) {
+    arithmetic_maximize((ArithmeticExpression)term);
+}

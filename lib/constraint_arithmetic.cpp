@@ -219,24 +219,26 @@ ArithmeticExpression arithmetic_variable_to_expression(ArithmeticVariable variab
     };
 }
 
-ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, ArithmeticExpression objective) {
+void solve_arithmetic_constraints(ArithmeticContext *context) {
     // Create full-sized tableau
-    auto variable_count = context.variable_count;
+    auto variable_count = context->variable_count;
 
-    auto is_variable_external = context.is_variable_external;
+    auto is_variable_external = context->is_variable_external;
 
-    auto constraint_count = context.constraint_count;
+    auto constraint_count = context->constraint_count;
 
-    auto objective_constant = objective.constant;
+    auto objective_constant = context->objective.constant;
     auto objective_coefficients = (float*)allocate(variable_count * sizeof(float));
 
     for(size_t i = 0; i < variable_count; i += 1) {
         objective_coefficients[i] = 0.0f;
     }
 
-    for(size_t i = 0; i < objective.coefficient_count; i += 1) {
-        objective_coefficients[i] = objective.coefficients[i];
+    for(size_t i = 0; i < context->objective.coefficient_count; i += 1) {
+        objective_coefficients[i] = context->objective.coefficients[i];
     }
+
+    deallocate(context->objective.coefficients);
 
     auto constraint_constants = (float*)allocate(constraint_count * sizeof(float));
 
@@ -247,7 +249,7 @@ ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, Arith
     }
 
     for(size_t i = 0; i < constraint_count; i += 1) {
-        auto constraint = context.constraints[i];
+        auto constraint = context->constraints[i];
 
         constraint_constants[i] = constraint.left_constant;
         constraint_constants[i] -= constraint.right_constant;
@@ -265,7 +267,7 @@ ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, Arith
         deallocate(constraint.right_coefficients);
     }
 
-    deallocate(context.constraints);
+    deallocate(context->constraints);
 
     auto constraint_variable_indices = (size_t*)allocate(constraint_count * sizeof(size_t));
 
@@ -283,20 +285,28 @@ ArithmeticSolution solve_arithmetic_constraints(ArithmeticContext context, Arith
     deallocate(objective_coefficients);
     deallocate(constraint_coefficients);
 
-    return {
-        constraint_variable_indices,
-        constraint_constants
-    };
+    context->solution_variable_indices = constraint_variable_indices;
+    context->solution_constants = constraint_constants;
 }
 
-float get_arithmetic_variable_value(ArithmeticContext context, ArithmeticSolution solution, ArithmeticVariable variable) {
+float get_arithmetic_variable_value(ArithmeticVariable variable) {
+    auto context = *variable.context;
+
     for(size_t i = 0; i < context.variable_count; i += 1) {
-        if(solution.constraint_variable_indices[i] == variable.index) {
-            return solution.constraint_constants[i];
+        if(context.solution_variable_indices[i] == variable.index) {
+            return context.solution_constants[i];
 
             break;
         }
     }
 
     return 0.0f;
+}
+
+void arithmetic_minimize(ArithmeticExpression expression) {
+    expression.context->objective = expression.context->objective + expression;
+}
+
+void arithmetic_maximize(ArithmeticExpression expression) {
+    expression.context->objective = expression.context->objective - expression;
 }

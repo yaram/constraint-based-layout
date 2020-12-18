@@ -63,10 +63,10 @@ inline Size get_frame_size() {
     };
 }
 
-static control_t *solidify_label(Label label, ArithmeticContext context, ArithmeticSolution solution) {
+static control_t *solidify_label(Label label) {
     return create_label(
-        get_arithmetic_variable_value(context, solution, label.x),
-        get_arithmetic_variable_value(context, solution, label.y),
+        get_arithmetic_variable_value(label.x),
+        get_arithmetic_variable_value(label.y),
         label.text.data,
         label.text.length,
         label.font_family.data,
@@ -100,12 +100,12 @@ static Button create_button(ArithmeticContext *context, String text, String font
     };
 }
 
-static control_t *solidify_button(Button button, ArithmeticContext context, ArithmeticSolution solution) {
+static control_t *solidify_button(Button button) {
     return create_button(
-        get_arithmetic_variable_value(context, solution, button.x),
-        get_arithmetic_variable_value(context, solution, button.y),
-        get_arithmetic_variable_value(context, solution, button.width),
-        get_arithmetic_variable_value(context, solution, button.height),
+        get_arithmetic_variable_value(button.x),
+        get_arithmetic_variable_value(button.y),
+        get_arithmetic_variable_value(button.width),
+        get_arithmetic_variable_value(button.height),
         button.text.data,
         button.text.length,
         button.font_family.data,
@@ -139,12 +139,12 @@ static TextInput create_text_input(ArithmeticContext *context, String text, Stri
     };
 }
 
-static control_t *solidify_text_input(TextInput text_input, ArithmeticContext context, ArithmeticSolution solution) {
+static control_t *solidify_text_input(TextInput text_input) {
     return create_text_input(
-        get_arithmetic_variable_value(context, solution, text_input.x),
-        get_arithmetic_variable_value(context, solution, text_input.y),
-        get_arithmetic_variable_value(context, solution, text_input.width),
-        get_arithmetic_variable_value(context, solution, text_input.height),
+        get_arithmetic_variable_value(text_input.x),
+        get_arithmetic_variable_value(text_input.y),
+        get_arithmetic_variable_value(text_input.width),
+        get_arithmetic_variable_value(text_input.height),
         text_input.text.data,
         text_input.text.length,
         text_input.font_family.data,
@@ -200,17 +200,17 @@ void render() {
 
     increment_button.y - (increment_button.y - (count_label.y + count_label_height)) * 0.5 == frame_size.height / 2;
 
-    auto solution = solve_arithmetic_constraints(context, { &context, 0.0f, 0, nullptr });
+    solve_arithmetic_constraints(&context);
 
     clear_controls();
 
-    solidify_label(test_label, context, solution);
-    solidify_label(count_label, context, solution);
-    solidify_button(increment_button, context, solution);
-    solidify_text_input(test_text_input, context, solution);
+    solidify_label(test_label);
+    solidify_label(count_label);
+    solidify_button(increment_button);
+    solidify_text_input(test_text_input);
 
-    free(solution.constraint_constants);
-    free(solution.constraint_variable_indices);
+    free(context.solution_constants);
+    free(context.solution_variable_indices);
 }
 
 extern "C" void init() {
