@@ -12,7 +12,7 @@ let frameResizeHandler;
 let textInputChangeHandler;
 
 const controlsEnvironment = initControls(
-    memory,
+    memory.buffer,
     frame,
     id => buttonPressHandler(id),
     () => frameResizeHandler(),
