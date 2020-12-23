@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EmccExtraArgs>C:/Users/Yaram/projects/constraint-based-layout/build/emscripten_debug/libsolver.a</EmccExtraArgs>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
+  </ItemGroup>
+
+</Project>

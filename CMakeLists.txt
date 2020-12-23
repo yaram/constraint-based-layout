@@ -49,4 +49,29 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Emscripten)
     target_link_options(example_emscripten_cpp PRIVATE "-s" EXTRA_EXPORTED_RUNTIME_METHODS=[\"ccall\"])
     target_link_options(example_emscripten_cpp PRIVATE "-s " EXPORTED_FUNCTIONS=[\"_init\",\"_button_press_handler\",\"_frame_resize_handler\",\"_text_input_change_handler\"])
     add_dependencies(example_emscripten_cpp example_emscripten_cpp_copy)
+
+    if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
+        if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+            set(DOTNET_CONFIGURATION Debug)
+        else()
+            set(DOTNET_CONFIGURATION ${CMAKE_BUILD_TYPE})
+        endif()
+
+        add_custom_target(
+            example_emscripten_csharp ALL
+            COMMAND cmake -E env "EMSDK=${EMSCRIPTEN_ROOT_PATH}/../.." "NATIVEAOT_ROOT=${NATIVEAOT_ROOT}"
+            dotnet publish
+            -r browser-wasm
+            -c ${DOTNET_CONFIGURATION}
+            --packages "${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_csharp/pkg/"
+            -p:Platform=wasm
+            "-p:EmccExtraArgs=$<TARGET_FILE:solver>"
+            "-p:BaseOutputPath=${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_csharp/bin/"
+            "-p:BaseIntermediateOutputPath=${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_csharp/obj/"
+            "-p:PublishDir=${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_csharp/publish/"
+            "${CMAKE_CURRENT_SOURCE_DIR}/examples/emscripten_csharp/EmscriptenCSharp.csproj"
+        )
+
+        add_dependencies(example_emscripten_csharp solver)
+    endif()
 endif()
