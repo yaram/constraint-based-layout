@@ -13,6 +13,4 @@ Module.onRuntimeInitialized = () => {
         () => Module.ccall('frame_resize_handler', 'void', [], []),
         id => Module.ccall('text_input_change_handler', 'void', ['i32'], [id])
     );
-
-    Module.ccall('init', 'void', []);
 };

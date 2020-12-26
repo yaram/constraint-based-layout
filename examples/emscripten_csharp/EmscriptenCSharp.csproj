@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
+    <ProjectReference Include="../../lib/csharp/Solver/Solver.csproj" />
+    <ProjectReference Include="../../lib/csharp/Controls/Controls.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,37 +1,26 @@
 using System;
+using System.Text;
 
 public static class Program {
     public static void Main() {
         try {
             Console.WriteLine("Test");
 
-            const int variableCount = 2;
-            const int constraintCount = 1;
-            var isVariableExternal = new bool[variableCount] { true, false };
-            var objectiveConstant = 0.0f;
-            var objectiveCoefficients = new float[variableCount] { 0.0f, 0.0f };
-            var constraintVariableIndices = new UIntPtr[constraintCount];
-            var constraintConstants = new float[constraintCount] { 0.0f };
-            var constraintCoefficients = new float[constraintCount * variableCount] { 1.0f, 1.0f };
+            var text = "Best Test";
+            var textBytes = Encoding.UTF8.GetBytes(text);
 
-            var result = Solver.solve(
-                (UIntPtr)variableCount,
-                (UIntPtr)constraintCount,
-                isVariableExternal,
-                ref objectiveConstant,
-                objectiveCoefficients,
-                constraintVariableIndices,
-                constraintConstants,
-                constraintCoefficients
+            var fontFamily = "sans-serif";
+            var fontFamilyBytes = Encoding.UTF8.GetBytes(fontFamily);
+
+            var label = Controls.create_label(
+                10.0f,
+                10.0f,
+                textBytes,
+                (UIntPtr)textBytes.Length,
+                fontFamilyBytes,
+                (UIntPtr)fontFamilyBytes.Length,
+                20.0f
             );
-
-            if(result) {
-                foreach(var constant in constraintConstants) {
-                    Console.WriteLine(constant);
-                }
-            } else {
-                Console.WriteLine("Objective is unbounded");
-            }
         } catch(Exception e) {
             Console.WriteLine(e);
         }
