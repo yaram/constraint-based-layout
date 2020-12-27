@@ -13,8 +13,8 @@ public static class Controls {
 
     [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
     public static extern void get_frame_size(
-        ref float width,
-        ref float height
+        out float width,
+        out float height
     );
 
     [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
