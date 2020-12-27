@@ -10,8 +10,17 @@ public static class Program {
     public static string TestText = "";
 
     public struct Label {
-        public ArithmeticVariable X;
-        public ArithmeticVariable Y;
+        public ArithmeticVariable Left;
+        public ArithmeticVariable Top;
+
+        public ArithmeticExpression Right { get { return Left + Width; } }
+        public ArithmeticExpression Bottom { get { return Top + Height; } }
+
+        public ArithmeticExpression HorizontalMiddle { get { return Left + Width / 2; } }
+        public ArithmeticExpression VerticalMiddle { get { return Top + Height / 2; } }
+
+        public float Width { get { return GetTextWidth(Text, FontFamily, FontSize); } }
+        public float Height { get { return FontSize; } }
 
         public string Text;
 
@@ -19,8 +28,8 @@ public static class Program {
         public float FontSize;
 
         public Label(ArithmeticContext context, string text, string fontFamily, float fontSize) {
-            X = new ArithmeticVariable(context);
-            Y = new ArithmeticVariable(context);
+            Left = new ArithmeticVariable(context);
+            Top = new ArithmeticVariable(context);
 
             Text = text;
 
@@ -33,8 +42,8 @@ public static class Program {
             var fontFamilyBytes = Encoding.UTF8.GetBytes(FontFamily);
 
             return create_label(
-                X.Value,
-                Y.Value,
+                Left.Value,
+                Top.Value,
                 textBytes,
                 (UIntPtr)textBytes.Length,
                 fontFamilyBytes,
@@ -66,11 +75,17 @@ public static class Program {
     }
 
     public struct Button {
-        public ArithmeticVariable X;
-        public ArithmeticVariable Y;
+        public ArithmeticVariable Left;
+        public ArithmeticVariable Top;
 
         public ArithmeticVariable Width;
         public ArithmeticVariable Height;
+
+        public ArithmeticExpression Right { get { return Left + Width; } }
+        public ArithmeticExpression Bottom { get { return Top + Height; } }
+
+        public ArithmeticExpression HorizontalMiddle { get { return Left + Width / 2; } }
+        public ArithmeticExpression VerticalMiddle { get { return Top + Height / 2; } }
 
         public String Text;
 
@@ -78,8 +93,8 @@ public static class Program {
         public float FontSize;
 
         public Button(ArithmeticContext context, string text, string fontFamily, float fontSize) {
-            X = new ArithmeticVariable(context);
-            Y = new ArithmeticVariable(context);
+            Left = new ArithmeticVariable(context);
+            Top = new ArithmeticVariable(context);
 
             Width = new ArithmeticVariable(context);
             Height = new ArithmeticVariable(context);
@@ -95,8 +110,8 @@ public static class Program {
             var fontFamilyBytes = Encoding.UTF8.GetBytes(FontFamily);
 
             return create_button(
-                X.Value,
-                Y.Value,
+                Left.Value,
+                Top.Value,
                 Width.Value,
                 Height.Value,
                 textBytes,
@@ -109,11 +124,17 @@ public static class Program {
     }
 
     public struct TextInput {
-        public ArithmeticVariable X;
-        public ArithmeticVariable Y;
+        public ArithmeticVariable Left;
+        public ArithmeticVariable Top;
 
         public ArithmeticVariable Width;
         public ArithmeticVariable Height;
+
+        public ArithmeticExpression Right { get { return Left + Width; } }
+        public ArithmeticExpression Bottom { get { return Top + Height; } }
+
+        public ArithmeticExpression HorizontalMiddle { get { return Left + Width / 2; } }
+        public ArithmeticExpression VerticalMiddle { get { return Top + Height / 2; } }
 
         public String Text;
 
@@ -121,8 +142,8 @@ public static class Program {
         public float FontSize;
 
         public TextInput(ArithmeticContext context, string text, string fontFamily, float fontSize) {
-            X = new ArithmeticVariable(context);
-            Y = new ArithmeticVariable(context);
+            Left = new ArithmeticVariable(context);
+            Top = new ArithmeticVariable(context);
 
             Width = new ArithmeticVariable(context);
             Height = new ArithmeticVariable(context);
@@ -138,8 +159,8 @@ public static class Program {
             var fontFamilyBytes = Encoding.UTF8.GetBytes(FontFamily);
 
             return create_text_input(
-                X.Value,
-                Y.Value,
+                Left.Value,
+                Top.Value,
                 Width.Value,
                 Height.Value,
                 textBytes,
@@ -157,39 +178,35 @@ public static class Program {
         var (frameWidth, frameHeight) = GetFrameSize();
 
         var testLabel = new Label(context, TestText, "sans-serif", 20);
-        var testLabelWidth = GetTextWidth(testLabel.Text, testLabel.FontFamily, testLabel.FontSize);
-        var testLabelHeight = testLabel.FontSize;
 
         var countLabel = new Label(context, Count.ToString(), "sans-serif", 20);
         var countLabelWidth = GetTextWidth(countLabel.Text, countLabel.FontFamily, countLabel.FontSize);
-        var countLabelHeight = countLabel.FontSize;
 
         var incrementButton = new Button(context, "Increment", "sans-serif", 20);
         var incrementButtonTextWidth = GetTextWidth(incrementButton.Text, incrementButton.FontFamily, incrementButton.FontSize);
-        var incrementButtonTextHeight = incrementButton.FontSize;
 
         var testTextInput = new TextInput(context, TestText, "sans-serif", 20);
-        var testTextInputTextHeight = testTextInput.FontSize;
+
+        var padding = 8.0f;
 
         context.AddConstraints(
             testTextInput.Width == frameWidth / 3,
-            testTextInput.Height == testTextInputTextHeight + 8 * 2,
+            testTextInput.Height == testTextInput.FontSize + padding * 2,
 
-            testTextInput.X + testTextInput.Width / 2 == incrementButton.X + incrementButton.Width / 2,
-            testTextInput.Y == incrementButton.Y + incrementButton.Height + 8,
+            testTextInput.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            testTextInput.Top == incrementButton.Bottom + padding,
 
-            incrementButton.Width <= frameWidth / 2,
-            incrementButton.Height == incrementButtonTextHeight + 8 * 2,
+            incrementButton.Width == frameWidth / 2,
+            incrementButton.Height == incrementButton.FontSize + padding * 2,
 
-            countLabel.X + countLabelWidth / 2 == incrementButton.X + incrementButton.Width / 2,
-            countLabel.Y + countLabelHeight == incrementButton.Y - 8,
+            incrementButton.HorizontalMiddle == frameWidth / 2,
+            incrementButton.Top - (incrementButton.Top - countLabel.Bottom) / 2 == frameHeight / 2,
 
-            testLabel.X + testLabelWidth / 2 == countLabel.X + countLabelWidth / 2,
-            testLabel.Y + testLabelHeight == countLabel.Y - 8,
+            countLabel.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            countLabel.Bottom == incrementButton.Top - padding,
 
-            incrementButton.X + incrementButton.Width / 2 == frameWidth / 2,
-
-            incrementButton.Y - (incrementButton.Y - (countLabel.Y + countLabelHeight)) / 2 == frameHeight / 2
+            testLabel.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            testLabel.Bottom == countLabel.Top - padding
         );
 
         context.Solve();
