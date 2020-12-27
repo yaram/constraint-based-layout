@@ -171,24 +171,26 @@ public static class Program {
         var testTextInput = new TextInput(context, TestText, "sans-serif", 20);
         var testTextInputTextHeight = testTextInput.FontSize;
 
-        context.AddConstraint(testTextInput.Width == frameWidth / 3);
-        context.AddConstraint(testTextInput.Height == testTextInputTextHeight + 8 * 2);
+        context.AddConstraints(
+            testTextInput.Width == frameWidth / 3,
+            testTextInput.Height == testTextInputTextHeight + 8 * 2,
 
-        context.AddConstraint(testTextInput.X + testTextInput.Width / 2 == incrementButton.X + incrementButton.Width / 2);
-        context.AddConstraint(testTextInput.Y == incrementButton.Y + incrementButton.Height + 8);
+            testTextInput.X + testTextInput.Width / 2 == incrementButton.X + incrementButton.Width / 2,
+            testTextInput.Y == incrementButton.Y + incrementButton.Height + 8,
 
-        context.AddConstraint(incrementButton.Width <= frameWidth / 2);
-        context.AddConstraint(incrementButton.Height == incrementButtonTextHeight + 8 * 2);
+            incrementButton.Width <= frameWidth / 2,
+            incrementButton.Height == incrementButtonTextHeight + 8 * 2,
 
-        context.AddConstraint(countLabel.X + countLabelWidth / 2 == incrementButton.X + incrementButton.Width / 2);
-        context.AddConstraint(countLabel.Y + countLabelHeight == incrementButton.Y - 8);
+            countLabel.X + countLabelWidth / 2 == incrementButton.X + incrementButton.Width / 2,
+            countLabel.Y + countLabelHeight == incrementButton.Y - 8,
 
-        context.AddConstraint(testLabel.X + testLabelWidth / 2 == countLabel.X + countLabelWidth / 2);
-        context.AddConstraint(testLabel.Y + testLabelHeight == countLabel.Y - 8);
+            testLabel.X + testLabelWidth / 2 == countLabel.X + countLabelWidth / 2,
+            testLabel.Y + testLabelHeight == countLabel.Y - 8,
 
-        context.AddConstraint(incrementButton.X + incrementButton.Width / 2 == frameWidth / 2);
+            incrementButton.X + incrementButton.Width / 2 == frameWidth / 2,
 
-        context.AddConstraint(incrementButton.Y - (incrementButton.Y - (countLabel.Y + countLabelHeight)) / 2 == frameHeight / 2);
+            incrementButton.Y - (incrementButton.Y - (countLabel.Y + countLabelHeight)) / 2 == frameHeight / 2
+        );
 
         context.Solve();
 

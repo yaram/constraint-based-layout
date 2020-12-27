@@ -67,8 +67,8 @@ namespace ConstraintArithmetic {
             return new ArithmeticConstraint(left.Constant, left.Coefficients, right.Constant, right.Coefficients);
         }
 
-        public void AddConstraint(ArithmeticConstraint constraint) {
-            Constraints.Add(constraint);
+        public void AddConstraints(params ArithmeticConstraint[] constraints) {
+            Constraints.AddRange(constraints);
         }
 
         public void Solve() {
