@@ -184,21 +184,21 @@ void render() {
     test_text_input.width == frame_size.width / 3;
     test_text_input.height == test_text_input_text_height + 8 * 2;
 
-    test_text_input.x + test_text_input.width * 0.5f == increment_button.x + increment_button.width * 0.5f;
+    test_text_input.x + test_text_input.width / 2 == increment_button.x + increment_button.width / 2;
     test_text_input.y == increment_button.y + increment_button.height + 8;
 
     increment_button.width <= frame_size.width / 2;
     increment_button.height == increment_button_text_height + 8 * 2;
 
-    count_label.x + count_label_width / 2 == increment_button.x + increment_button.width * 0.5f;
-    count_label.y + count_label_height == increment_button.y + -8;
+    count_label.x + count_label_width / 2 == increment_button.x + increment_button.width / 2;
+    count_label.y + count_label_height == increment_button.y - 8;
 
-    test_label.x + test_label_width / 2 == count_label.x + count_label_width * 0.5f;
-    test_label.y + test_label_height == count_label.y + -8;
+    test_label.x + test_label_width / 2 == count_label.x + count_label_width / 2;
+    test_label.y + test_label_height == count_label.y - 8;
 
-    increment_button.x + increment_button.width * 0.5 == frame_size.width / 2;
+    increment_button.x + increment_button.width / 2 == frame_size.width / 2;
 
-    increment_button.y - (increment_button.y - (count_label.y + count_label_height)) * 0.5 == frame_size.height / 2;
+    increment_button.y - (increment_button.y - (count_label.y + count_label_height)) / 2 == frame_size.height / 2;
 
     solve_arithmetic_constraints(&context);
 

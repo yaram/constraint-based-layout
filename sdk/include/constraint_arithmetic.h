@@ -144,6 +144,10 @@ inline ArithmeticExpression operator*(float constant, ArithmeticExpression expre
     return expression + constant;
 }
 
+inline ArithmeticExpression operator/(ArithmeticExpression expression, float constant) {
+    return expression * (1.0f / constant);
+}
+
 struct ArithmeticTerm {
     ArithmeticContext *context;
 
@@ -160,6 +164,28 @@ ArithmeticExpression operator+(ArithmeticTerm term, float constant);
 
 inline ArithmeticExpression operator+(float constant, ArithmeticTerm term) {
     return term + constant;
+}
+
+inline ArithmeticExpression operator-(ArithmeticTerm term, float constant) {
+    return term + -constant;
+}
+
+inline ArithmeticExpression operator-(float constant, ArithmeticTerm term) {
+    return constant + -term;
+}
+
+inline ArithmeticTerm operator*(ArithmeticTerm term, float constant) {
+    term.coefficient *= constant;
+
+    return term;
+}
+
+inline ArithmeticTerm operator*(float constant, ArithmeticTerm term) {
+    return term * constant;
+}
+
+inline ArithmeticTerm operator/(ArithmeticTerm term, float constant) {
+    return term * (1.0f / constant);
 }
 
 ArithmeticExpression operator+(ArithmeticExpression expression, ArithmeticTerm term);
@@ -210,8 +236,8 @@ inline ArithmeticTerm operator*(ArithmeticVariable variable, float coefficient) 
     };
 }
 
-inline ArithmeticTerm operator*(float coefficient, ArithmeticVariable variable) {
-    return variable * coefficient;
+inline ArithmeticTerm operator/(ArithmeticVariable variable, float coefficient) {
+    return variable * (1.0f / coefficient);
 }
 
 ArithmeticExpression arithmetic_variable_to_expression(ArithmeticVariable variable);
