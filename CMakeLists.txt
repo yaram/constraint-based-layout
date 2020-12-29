@@ -40,3 +40,25 @@ ExternalProject_Add(
     INSTALL_COMMAND ""
     DEPENDS sdk
 )
+
+if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
+    if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+        set(DOTNET_CONFIGURATION Debug)
+    else()
+        set(DOTNET_CONFIGURATION ${CMAKE_BUILD_TYPE})
+    endif()
+
+    add_custom_target(
+        emscripten_csharp ALL
+        COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\""
+        dotnet publish
+        -r browser-wasm
+        -c ${DOTNET_CONFIGURATION}
+        -p:Platform=wasm
+        "\"-p:EMSDK=${EMSDK}\""
+        "\"-p:ConstraintSDKPath=${CMAKE_CURRENT_BINARY_DIR}/sdk/install\""
+        "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/emscripten_csharp/Example.csproj\""
+    )
+
+    add_dependencies(emscripten_csharp sdk)
+endif()
