@@ -4,6 +4,8 @@ include(ExternalProject)
 
 project(ConstraintBasedLayout)
 
+add_custom_target(examples)
+
 ExternalProject_Add(
     sdk
     PREFIX sdk
@@ -26,7 +28,10 @@ ExternalProject_Add(
     -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
     INSTALL_COMMAND ""
     DEPENDS sdk
+    EXCLUDE_FROM_ALL true
 )
+
+add_dependencies(examples bare_wasm_cpp)
 
 ExternalProject_Add(
     emscripten_cpp
@@ -39,7 +44,10 @@ ExternalProject_Add(
     -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
     INSTALL_COMMAND ""
     DEPENDS sdk
+    EXCLUDE_FROM_ALL true
 )
+
+add_dependencies(examples emscripten_cpp)
 
 if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
     if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -49,7 +57,7 @@ if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
     endif()
 
     add_custom_target(
-        emscripten_csharp ALL
+        emscripten_csharp
         COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\""
         dotnet publish
         -r browser-wasm
@@ -61,4 +69,6 @@ if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
     )
 
     add_dependencies(emscripten_csharp sdk)
+
+    add_dependencies(examples emscripten_csharp)
 endif()
