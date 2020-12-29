@@ -241,7 +241,7 @@ namespace ConstraintArithmetic {
         }
 
         public static ArithmeticExpression operator -(float constant, ArithmeticExpression expression) {
-            return expression + -constant;
+            return constant + -expression;
         }
 
         public static ArithmeticExpression operator *(ArithmeticExpression expression, float constant) {
@@ -388,7 +388,7 @@ namespace ConstraintArithmetic {
         }
 
         public static ArithmeticExpression operator -(float constant, ArithmeticTerm term) {
-            return term + -constant;
+            return constant + -term;
         }
 
         public static ArithmeticTerm operator *(ArithmeticTerm term, float constant) {
