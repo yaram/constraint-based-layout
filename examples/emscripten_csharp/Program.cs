@@ -3,7 +3,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using ConstraintArithmetic;
-using static Controls;
+using static SystemControls;
 
 public static class Program {
     public static int Count = 0;

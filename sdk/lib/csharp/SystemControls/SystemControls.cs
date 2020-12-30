@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-public static class Controls {
+public static class SystemControls {
     [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
     public static extern float get_text_width(
         byte[] text_data,

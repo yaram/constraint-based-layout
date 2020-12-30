@@ -12,11 +12,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
     <ProjectReference Include="../../sdk/lib/csharp/ConstraintArithmetic/ConstraintArithmetic.csproj" />
-    <ProjectReference Include="../../sdk/lib/csharp/Controls/Controls.csproj" />
+    <ProjectReference Include="../../sdk/lib/csharp/SystemControls/SystemControls.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="index.html;index.js;index.css;$(ConstraintSDKPath)/lib/controls.js">
+    <Content Include="index.html;index.js;index.css;$(ConstraintSDKPath)/lib/system_controls.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

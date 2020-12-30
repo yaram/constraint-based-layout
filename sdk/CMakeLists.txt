@@ -29,8 +29,8 @@ ExternalProject_Add(
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 
 install(
-    FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/browser/controls.js
+    DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/browser/
     DESTINATION lib
 )
 

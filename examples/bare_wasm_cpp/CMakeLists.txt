@@ -10,7 +10,7 @@ add_custom_target(
     "\"${CMAKE_CURRENT_SOURCE_DIR}/index.html\""
     "\"${CMAKE_CURRENT_SOURCE_DIR}/index.js\""
     "\"${CMAKE_CURRENT_SOURCE_DIR}/index.css\""
-    "\"${ConstraintSDK_DIR}/lib/controls.js\""
+    "\"${ConstraintSDK_DIR}/lib/system_controls.js\""
     "\"${CMAKE_CURRENT_BINARY_DIR}\""
 )
 

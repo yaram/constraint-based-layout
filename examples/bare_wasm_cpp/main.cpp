@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "environment.h"
 #include "constraint_arithmetic.h"
-#include "controls.h"
+#include "system_controls.h"
 
 const size_t max_allocator_space = 4096;
 
