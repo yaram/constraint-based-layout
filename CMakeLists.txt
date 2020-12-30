@@ -13,6 +13,7 @@ ExternalProject_Add(
     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/sdk/stamp
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/sdk
     CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DEMSDK=${EMSDK}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
 )
@@ -24,6 +25,7 @@ ExternalProject_Add(
     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/bare_wasm_cpp/stamp
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/bare_wasm_cpp
     CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_BINARY_DIR}/sdk/install/cmake/wasm32-unknown.cmake
     -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
     INSTALL_COMMAND ""
@@ -40,6 +42,7 @@ ExternalProject_Add(
     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_cpp/stamp
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/emscripten_cpp
     CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_TOOLCHAIN_FILE=${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
     -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
     INSTALL_COMMAND ""

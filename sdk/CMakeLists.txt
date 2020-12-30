@@ -11,6 +11,7 @@ ExternalProject_Add(
     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten/stamp
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten
     CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_TOOLCHAIN_FILE=${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
     INSTALL_COMMAND ""
 )
@@ -22,6 +23,7 @@ ExternalProject_Add(
     STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown/stamp
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown
     CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm32-unknown.cmake
     INSTALL_COMMAND ""
 )
