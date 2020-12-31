@@ -64,8 +64,12 @@ void perform_layout(LayoutContext *context) {
 
 extern "C" void button_press_handler(control_t *button) {
     for(auto saved_button : global_layout_context.buttons) {
-        if(saved_button.control == button && saved_button.press_handler != nullptr) {
-            saved_button.press_handler();
+        if(saved_button.control == button) {
+            if(saved_button.press_handler != nullptr) {
+                saved_button.press_handler();
+            }
+
+            break;
         }
     }
 }
@@ -82,19 +86,23 @@ extern "C" void frame_resize_handler() {
 
 extern "C" void text_input_change_handler(control_t *text_input) {
     for(auto saved_text_input : global_layout_context.text_inputs) {
-        if(saved_text_input.control == text_input && saved_text_input.change_handler != nullptr) {
-            auto length = get_text_input_text(saved_text_input.control, nullptr, 0);
+        if(saved_text_input.control == text_input) {
+            if(saved_text_input.change_handler != nullptr) {
+                auto length = get_text_input_text(saved_text_input.control, nullptr, 0);
 
-            auto buffer = (char*)allocate(length);
+                auto buffer = (char*)allocate(length);
 
-            get_text_input_text(saved_text_input.control, buffer, length);
+                get_text_input_text(saved_text_input.control, buffer, length);
 
-            String text {
-                buffer,
-                length
-            };
+                String text {
+                    buffer,
+                    length
+                };
 
-            saved_text_input.change_handler(text);
+                saved_text_input.change_handler(text);
+            }
+
+            break;
         }
     }
 }

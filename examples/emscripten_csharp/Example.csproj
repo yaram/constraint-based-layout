@@ -11,8 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
-    <ProjectReference Include="../../sdk/lib/csharp/ConstraintArithmetic/ConstraintArithmetic.csproj" />
-    <ProjectReference Include="../../sdk/lib/csharp/SystemControls/SystemControls.csproj" />
+    <ProjectReference Include="../../sdk/lib/csharp/Controls/Controls.csproj" />
   </ItemGroup>
 
   <ItemGroup>
