@@ -52,6 +52,8 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
 
         element.style.position = 'absolute';
 
+        element.style.whiteSpace = 'nowrap';
+
         element.style.mozUserSelect = 'none';
         element.style.webkitUserSelect = 'none';
         element.style.msUserSelect = 'none';

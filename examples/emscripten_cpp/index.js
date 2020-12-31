@@ -1,6 +1,7 @@
 Module.onRuntimeInitialized = () => {
     const frame = document.createElement('div');
     frame.style.position = 'absolute';
+    frame.style.overflow = 'hidden';
     frame.style.width = '100%';
     frame.style.height = '100%';
 
