@@ -64,10 +64,10 @@ void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality i
         (void*)context->constraints,
         context->constraint_count * sizeof(ArithmeticContext::ArithmeticConstraint)
     );
-
+ 
     context->constraints[constraint_index] = {
         left.constant,
-        context->variable_count,
+        left.coefficient_count,
         left.coefficients,
         right.constant,
         right.coefficient_count,

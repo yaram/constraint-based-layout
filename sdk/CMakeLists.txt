@@ -4,29 +4,32 @@ include(ExternalProject)
 
 project(ConstraintSDK)
 
-ExternalProject_Add(
-    wasm32-emscripten
-    PREFIX wasm32-emscripten
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten/stamp
-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten
-    CMAKE_ARGS
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
-    INSTALL_COMMAND ""
-)
+set(PLATFORMS wasm32-unknown wasm32-emscripten)
 
-ExternalProject_Add(
-    wasm32-unknown
-    PREFIX wasm32-unknown
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib
-    STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown/stamp
-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown
-    CMAKE_ARGS
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm32-unknown.cmake
-    INSTALL_COMMAND ""
-)
+set(PLATFORM_TOOLCHAIN_wasm32-unknown ${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm32-unknown.cmake)
+set(PLATFORM_TOOLCHAIN_wasm32-emscripten ${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake)
+
+foreach(platform ${PLATFORMS})
+    ExternalProject_Add(
+        ${platform}
+        PREFIX ${platform}
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib
+        STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${platform}/stamp
+        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${platform}
+        CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DCMAKE_TOOLCHAIN_FILE=${PLATFORM_TOOLCHAIN_${platform}}
+        INSTALL_COMMAND ""
+    )
+
+    install(
+        FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${platform}/libsolver.a
+        ${CMAKE_CURRENT_BINARY_DIR}/${platform}/libconstraint_arithmetic.a
+        ${CMAKE_CURRENT_BINARY_DIR}/${platform}/libcontrols.a
+        DESTINATION lib/${platform}
+    )
+endforeach()
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION include)
 
@@ -34,20 +37,6 @@ install(
     DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/browser/
     DESTINATION lib
-)
-
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten/libsolver.a
-    ${CMAKE_CURRENT_BINARY_DIR}/wasm32-emscripten/libconstraint_arithmetic.a
-    DESTINATION lib/wasm32-emscripten
-)
-
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown/libsolver.a
-    ${CMAKE_CURRENT_BINARY_DIR}/wasm32-unknown/libconstraint_arithmetic.a
-    DESTINATION lib/wasm32-unknown
 )
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/wasm32-unknown.cmake DESTINATION cmake)

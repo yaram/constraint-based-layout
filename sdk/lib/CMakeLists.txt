@@ -8,3 +8,6 @@ target_include_directories(solver PUBLIC ../include)
 add_library(constraint_arithmetic STATIC constraint_arithmetic.cpp)
 target_link_libraries(constraint_arithmetic PRIVATE solver)
 target_include_directories(constraint_arithmetic PUBLIC ../include)
+
+add_library(controls STATIC controls.cpp)
+target_include_directories(controls PUBLIC ../include)

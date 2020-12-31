@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 
 project(EmscriptenCPP C CXX)
 
-find_package(ConstraintSDK REQUIRED Arithmetic)
+find_package(ConstraintSDK REQUIRED Arithmetic Controls)
 
 add_custom_target(
     copy_files
