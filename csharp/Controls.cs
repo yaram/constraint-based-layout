@@ -3,10 +3,10 @@ using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using static SystemControls;
-using ConstraintArithmetic;
+using static ConstraintSDK.SystemControls;
+using ConstraintSDK.ConstraintArithmetic;
 
-namespace Controls {
+namespace ConstraintSDK.Controls {
     public class Label {
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;

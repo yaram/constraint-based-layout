@@ -15,10 +15,10 @@ add_custom_target(
 )
 
 add_executable(example main.cpp)
-set_target_properties(example PROPERTIES LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/emscripten_library.js")
+set_target_properties(example PROPERTIES LINK_DEPENDS "${ConstraintSDK_DIR}/lib/system_controls_emscripten.js")
 target_include_directories(example PRIVATE ${ConstraintSDK_INCLUDE_DIRS})
 target_link_libraries(example PRIVATE ${ConstraintSDK_LIBRARIES})
-target_link_options(example PRIVATE --js-library "${CMAKE_CURRENT_SOURCE_DIR}/emscripten_library.js")
+target_link_options(example PRIVATE --js-library "${ConstraintSDK_DIR}/lib/system_controls_emscripten.js")
 target_link_options(example PRIVATE "-s" EXTRA_EXPORTED_RUNTIME_METHODS=[\"ccall\"])
 target_link_options(example PRIVATE "-s " EXPORTED_FUNCTIONS=[\"_init\",\"_button_press_handler\",\"_frame_resize_handler\",\"_text_input_change_handler\"])
 add_dependencies(example copy_files)

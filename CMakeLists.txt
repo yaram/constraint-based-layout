@@ -18,6 +18,19 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
 )
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+    set(DOTNET_CONFIGURATION Debug)
+else()
+    set(DOTNET_CONFIGURATION ${CMAKE_BUILD_TYPE})
+endif()
+
+add_custom_target(
+    sdk_nuget_package ALL
+    dotnet pack
+    -c ${DOTNET_CONFIGURATION}
+    "\"${CMAKE_CURRENT_SOURCE_DIR}/csharp/ConstraintSDK.csproj\""
+)
+
 ExternalProject_Add(
     bare_wasm_cpp
     PREFIX examples/bare_wasm_cpp
@@ -53,16 +66,11 @@ ExternalProject_Add(
 add_dependencies(examples emscripten_cpp)
 
 if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
-    if("${CMAKE_BUILD_TYPE}" STREQUAL "")
-        set(DOTNET_CONFIGURATION Debug)
-    else()
-        set(DOTNET_CONFIGURATION ${CMAKE_BUILD_TYPE})
-    endif()
-
     add_custom_target(
         emscripten_csharp
-        COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\""
+        COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\"" "\"SDK_NUGET_PACKAGE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/csharp/bin/${DOTNET_CONFIGURATION}\""
         dotnet publish
+        --packages ${CMAKE_CURRENT_BINARY_DIR}/nuget_packages
         -r browser-wasm
         -c ${DOTNET_CONFIGURATION}
         -p:Platform=wasm
@@ -71,7 +79,7 @@ if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
         "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/emscripten_csharp/Example.csproj\""
     )
 
-    add_dependencies(emscripten_csharp sdk)
+    add_dependencies(emscripten_csharp sdk sdk_nuget_package)
 
     add_dependencies(examples emscripten_csharp)
 endif()

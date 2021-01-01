@@ -5,17 +5,13 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <EmccExtraArgs>$(ConstraintSDKPath)/lib/wasm32-emscripten/libsolver.a --js-library $(MSBuildProjectDirectory)/emscripten_library.js -s NO_EXIT_RUNTIME -s EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"] -s EXPORTED_FUNCTIONS=["_main","_button_press_handler","_frame_resize_handler","_text_input_change_handler"]</EmccExtraArgs>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
-    <ProjectReference Include="../../sdk/lib/csharp/Controls/Controls.csproj" />
+    <PackageReference Include="ConstraintSDK" Version="0.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="index.html;index.js;index.css;$(ConstraintSDKPath)/lib/system_controls.js">
+    <Content Include="index.html;index.js;index.css;">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

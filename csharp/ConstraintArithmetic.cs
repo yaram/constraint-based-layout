@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using static Solver;
+using static ConstraintSDK.Solver;
 
 #pragma warning disable CS0660, CS0661
 
-namespace ConstraintArithmetic {
+namespace ConstraintSDK.ConstraintArithmetic {
     public struct ArithmeticConstraint {
         public float LeftConstant;
         public float[] LeftCoefficients;
