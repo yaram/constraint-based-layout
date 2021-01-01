@@ -28,8 +28,11 @@ add_custom_target(
     sdk_nuget_package ALL
     dotnet pack
     -c ${DOTNET_CONFIGURATION}
+    "\"-p:ConstraintSDKPath=${CMAKE_CURRENT_BINARY_DIR}/sdk/install\""
     "\"${CMAKE_CURRENT_SOURCE_DIR}/csharp/ConstraintSDK.csproj\""
 )
+
+add_dependencies(sdk_nuget_package sdk)
 
 ExternalProject_Add(
     bare_wasm_cpp
@@ -75,11 +78,10 @@ if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
         -c ${DOTNET_CONFIGURATION}
         -p:Platform=wasm
         "\"-p:EMSDK=${EMSDK}\""
-        "\"-p:ConstraintSDKPath=${CMAKE_CURRENT_BINARY_DIR}/sdk/install\""
         "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/emscripten_csharp/Example.csproj\""
     )
 
-    add_dependencies(emscripten_csharp sdk sdk_nuget_package)
+    add_dependencies(emscripten_csharp sdk_nuget_package)
 
     add_dependencies(examples emscripten_csharp)
 endif()

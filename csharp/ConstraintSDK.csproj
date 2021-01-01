@@ -6,8 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="build/*">
+    <Content Include="build/**/*">
       <PackagePath>build</PackagePath>
+    </Content>
+    <Content Include="$(ConstraintSDKPath)/**/*">
+      <PackagePath>build/sdk</PackagePath>
     </Content>
   </ItemGroup>
 
