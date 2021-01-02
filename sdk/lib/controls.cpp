@@ -4,12 +4,6 @@ bool first_layout = true;
 LayoutContext global_layout_context;
 
 void perform_layout(LayoutContext *context) {
-    if(first_layout) {
-        deallocate((void*)context->labels.elements);
-        deallocate((void*)context->buttons.elements);
-        deallocate((void*)context->text_inputs.elements);
-    }
-
     clear_controls();
 
     solve_arithmetic_constraints(&context->arithmetic_context);
@@ -52,6 +46,12 @@ void perform_layout(LayoutContext *context) {
             text_input.font_family.length,
             text_input.font_size
         );
+    }
+
+    if(!first_layout) {
+        deallocate((void*)global_layout_context.labels.elements);
+        deallocate((void*)global_layout_context.buttons.elements);
+        deallocate((void*)global_layout_context.text_inputs.elements);
     }
 
     deallocate((void*)context->arithmetic_context.solution_variable_indices);
