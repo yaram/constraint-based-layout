@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="6.0.0-*" />
-    <PackageReference Include="ConstraintSDK" Version="0.0.2" />
+    <PackageReference Include="ConstraintSDK" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
