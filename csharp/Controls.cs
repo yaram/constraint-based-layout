@@ -247,7 +247,7 @@ namespace ConstraintSDK.Controls {
         [UnmanagedCallersOnly(EntryPoint = "frame_resize_handler", CallConvs = new Type[] { typeof(CallConvCdecl) })]
         public static void frame_resize_handler() {
             try {
-                if(GlobalLayoutContext.FrameResize != null) {
+                if(GlobalLayoutContext != null && GlobalLayoutContext.FrameResize != null) {
                     float width;
                     float height;
                     get_frame_size(out width, out height);

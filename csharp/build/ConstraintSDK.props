@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <IlcCompileInput Include="$(MSBuildThisFileDirectory)/../lib/$(TargetFramework)/ConstraintSDK.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <NativeLibrary Condition="'$(RuntimeIdentifier)' == 'win-x64'" Include="$(ConstraintSDKPath)/lib/x86_64-pc-windows/solver.lib" />
+    <NativeLibrary Condition="'$(RuntimeIdentifier)' == 'win-x64'" Include="$(ConstraintSDKPath)/lib/x86_64-pc-windows/system_controls.lib" />
+
+    <DirectPInvoke Condition="'$(RuntimeIdentifier)' == 'win-x64'" Include="__Internal" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Condition="'$(RuntimeIdentifier)' == 'browser-wasm'" Include="$(ConstraintSDKPath)/lib/system_controls.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

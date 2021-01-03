@@ -89,19 +89,36 @@ if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
     add_dependencies(examples emscripten_csharp)
 endif()
 
-ExternalProject_Add(
-    windows_cpp
-    PREFIX examples/windows_cpp
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/windows_cpp
-    STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/windows_cpp/stamp
-    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/windows_cpp
-    CMAKE_ARGS
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
-    INSTALL_COMMAND ""
-    DEPENDS sdk
-    EXCLUDE_FROM_ALL true
-    BUILD_ALWAYS true
-)
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL AMD64)
+    ExternalProject_Add(
+        windows_cpp
+        PREFIX examples/windows_cpp
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/windows_cpp
+        STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/windows_cpp/stamp
+        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/examples/windows_cpp
+        CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DConstraintSDK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
+        INSTALL_COMMAND ""
+        DEPENDS sdk
+        EXCLUDE_FROM_ALL true
+        BUILD_ALWAYS true
+    )
+
+    add_custom_target(
+        windows_csharp
+        COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\"" "\"SDK_NUGET_PACKAGE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/csharp/bin/${DOTNET_CONFIGURATION}\""
+        dotnet publish
+        -t:LinkNative
+        --packages ${CMAKE_CURRENT_BINARY_DIR}/nuget_packages
+        -r win-x64
+        -c ${DOTNET_CONFIGURATION}
+        "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/windows_csharp/Example.csproj\""
+    )
+
+    add_dependencies(windows_csharp sdk_nuget_package)
+
+    add_dependencies(examples windows_csharp)
+endif()
 
 add_dependencies(examples windows_cpp)
