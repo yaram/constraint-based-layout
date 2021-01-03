@@ -16,6 +16,7 @@ ExternalProject_Add(
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
     -DEMSDK=${EMSDK}
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/sdk/install
+    BUILD_ALWAYS true
 )
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -47,6 +48,7 @@ ExternalProject_Add(
     INSTALL_COMMAND ""
     DEPENDS sdk
     EXCLUDE_FROM_ALL true
+    BUILD_ALWAYS true
 )
 
 add_dependencies(examples bare_wasm_cpp)
@@ -64,6 +66,7 @@ ExternalProject_Add(
     INSTALL_COMMAND ""
     DEPENDS sdk
     EXCLUDE_FROM_ALL true
+    BUILD_ALWAYS true
 )
 
 add_dependencies(examples emscripten_cpp)

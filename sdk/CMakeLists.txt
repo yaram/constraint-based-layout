@@ -20,6 +20,7 @@ foreach(platform ${PLATFORMS})
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_TOOLCHAIN_FILE=${PLATFORM_TOOLCHAIN_${platform}}
         INSTALL_COMMAND ""
+        BUILD_ALWAYS true
     )
 
     install(
