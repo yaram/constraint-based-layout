@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ConstraintSDKPath>$(MSBuildThisFileDirectory)/sdk</ConstraintSDKPath>
 
-    <EmccExtraArgs Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">$(EmccExtraArgs) $(ConstraintSDKPath)/lib/wasm32-emscripten/libsolver.a --js-library $(ConstraintSDKPath)/lib/system_controls_emscripten.js -s NO_EXIT_RUNTIME -s EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"] -s EXPORTED_FUNCTIONS=["_main","_button_press_handler","_frame_resize_handler","_text_input_change_handler"]</EmccExtraArgs>
+    <EmccExtraArgs Condition="'$(RuntimeIdentifier)' == 'browser-wasm'">$(EmccExtraArgs) $(ConstraintSDKPath)/lib/wasm32-unknown-emscripten/libsolver.a --js-library $(ConstraintSDKPath)/lib/system_controls_emscripten.js -s NO_EXIT_RUNTIME -s EXTRA_EXPORTED_RUNTIME_METHODS=["ccall"] -s EXPORTED_FUNCTIONS=["_main","_button_press_handler","_frame_resize_handler","_text_input_change_handler"]</EmccExtraArgs>
   </PropertyGroup>
 
   <ItemGroup>

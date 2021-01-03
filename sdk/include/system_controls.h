@@ -18,6 +18,8 @@ float get_text_width(
 
 void get_frame_size(float *width, float *height);
 
+void frame_resize_handler();
+
 void clear_controls();
 
 control_t *create_label(
