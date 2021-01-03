@@ -7,7 +7,33 @@ using static ConstraintSDK.SystemControls;
 using ConstraintSDK.ConstraintArithmetic;
 
 namespace ConstraintSDK.Controls {
+    public struct Color {
+        public float Red;
+        public float Green;
+        public float Blue;
+        public float Alpha;
+
+        public Color(float red, float green, float blue, float alpha) {
+            Red = red;
+            Green = green;
+            Blue = blue;
+            Alpha = alpha;
+        }
+
+        public int Pack() {
+            return (int)(Red * 0xFF) | (int)(Green * 0xFF) << 8 | (int)(Blue * 0xFF) << 16 | (int)(Alpha * 0xFF) << 24;
+        }
+    }
+
     public class Label {
+        public class Style {
+            public Color TextColor;
+
+            public Style(Color textColor) {
+                TextColor = textColor;
+            }
+        }
+
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
 
@@ -25,6 +51,8 @@ namespace ConstraintSDK.Controls {
         public string FontFamily;
         public float FontSize;
 
+        public Style CurrentStyle;
+
         public UIntPtr Control = UIntPtr.Zero;
 
         public Label(LayoutContext context, string text, string fontFamily, float fontSize) {
@@ -36,11 +64,29 @@ namespace ConstraintSDK.Controls {
             FontFamily = fontFamily;
             FontSize = fontSize;
 
+            CurrentStyle = context.DefaultLabelStyle;
+
             context.Labels.Add(this);
         }
     }
 
     public class Button {
+        public class Style {
+            public Color TextColor;
+
+            public Color BackgroundColor;
+
+            public float BorderSize;
+            public Color BorderColor;
+
+            public Style(Color textColor, Color backgroundColor, float borderSize, Color borderColor) {
+                TextColor = textColor;
+                BackgroundColor = backgroundColor;
+                BorderSize = borderSize;
+                BorderColor = borderColor;
+            }
+        }
+
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
 
@@ -57,6 +103,8 @@ namespace ConstraintSDK.Controls {
 
         public string FontFamily;
         public float FontSize;
+
+        public Style CurrentStyle;
 
         public event Action Press = null;
 
@@ -74,6 +122,8 @@ namespace ConstraintSDK.Controls {
             FontFamily = fontFamily;
             FontSize = fontSize;
 
+            CurrentStyle = context.DefaultButtonStyle;
+
             context.Buttons.Add(this);
         }
 
@@ -85,6 +135,22 @@ namespace ConstraintSDK.Controls {
     }
 
     public class TextInput {
+        public class Style {
+            public Color TextColor;
+
+            public Color BackgroundColor;
+
+            public float BorderSize;
+            public Color BorderColor;
+
+            public Style(Color textColor, Color backgroundColor, float borderSize, Color borderColor) {
+                TextColor = textColor;
+                BackgroundColor = backgroundColor;
+                BorderSize = borderSize;
+                BorderColor = borderColor;
+            }
+        }
+
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
 
@@ -102,6 +168,8 @@ namespace ConstraintSDK.Controls {
         public string FontFamily;
         public float FontSize;
 
+        public Style CurrentStyle;
+
         public event Action<string> Change = null;
 
         public UIntPtr Control = UIntPtr.Zero;
@@ -117,6 +185,8 @@ namespace ConstraintSDK.Controls {
 
             FontFamily = fontFamily;
             FontSize = fontSize;
+
+            CurrentStyle = context.DefaultTextInputStyle;
 
             context.TextInputs.Add(this);
         }
@@ -145,10 +215,30 @@ namespace ConstraintSDK.Controls {
         public List<Button> Buttons = new List<Button>();
         public List<TextInput> TextInputs = new List<TextInput>();
 
+        public Color BackgroundColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+        public Label.Style DefaultLabelStyle = new Label.Style(
+            new Color(0.0f, 0.0f, 0.0f, 1.0f)
+        );
+
+        public Button.Style DefaultButtonStyle = new Button.Style(
+            new Color(0.0f, 0.0f, 0.0f, 1.0f),
+            new Color(0.9f, 0.9f, 0.9f, 1.0f),
+            1.0f,
+            new Color(0.7f, 0.7f, 0.7f, 1.0f)
+        );
+
+        public TextInput.Style DefaultTextInputStyle = new TextInput.Style(
+            new Color(0.0f, 0.0f, 0.0f, 1.0f),
+            new Color(1.0f, 1.0f, 1.0f, 1.0f),
+            1.0f,
+            new Color(0.7f, 0.7f, 0.7f, 1.0f)
+        );
+
         public event Action<float, float> FrameResize = null;
 
         public void PerformLayout() {
-            clear_controls();
+            clear_controls(BackgroundColor.Pack());
 
             ArithmeticContext.Solve();
 
@@ -163,7 +253,8 @@ namespace ConstraintSDK.Controls {
                     (UIntPtr)textBytes.Length,
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
-                    label.FontSize
+                    label.FontSize,
+                    label.CurrentStyle.TextColor.Pack()
                 );
             }
 
@@ -180,7 +271,11 @@ namespace ConstraintSDK.Controls {
                     (UIntPtr)textBytes.Length,
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
-                    button.FontSize
+                    button.FontSize,
+                    button.CurrentStyle.TextColor.Pack(),
+                    button.CurrentStyle.BackgroundColor.Pack(),
+                    button.CurrentStyle.BorderSize,
+                    button.CurrentStyle.BorderColor.Pack()
                 );
             }
 
@@ -197,7 +292,11 @@ namespace ConstraintSDK.Controls {
                     (UIntPtr)textBytes.Length,
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
-                    textInput.FontSize
+                    textInput.FontSize,
+                    textInput.CurrentStyle.TextColor.Pack(),
+                    textInput.CurrentStyle.BackgroundColor.Pack(),
+                    textInput.CurrentStyle.BorderSize,
+                    textInput.CurrentStyle.BorderColor.Pack()
                 );
             }
 

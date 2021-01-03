@@ -1,29 +1,29 @@
-function getTextWidth(textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
-    return controlsEnvironment.get_text_width(textData, textLength, fontFamilyData, fontFamilyLength, fontSize);
+function getTextWidth(...args) {
+    return controlsEnvironment.get_text_width(...args);
 }
 
-function getFrameSize(width, height) {
-    return controlsEnvironment.get_frame_size(width, height);
+function getFrameSize(...args) {
+    return controlsEnvironment.get_frame_size(...args);
 }
 
-function clearControls() {
-    return controlsEnvironment.clear_controls();
+function clearControls(...args) {
+    return controlsEnvironment.clear_controls(...args);
 }
 
-function createLabel(x, y, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
-    return controlsEnvironment.create_label(x, y, textData, textLength, fontFamilyData, fontFamilyLength, fontSize);
+function createLabel(...args) {
+    return controlsEnvironment.create_label(...args);
 }
 
-function createButton(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
-    return controlsEnvironment.create_button(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize);
+function createButton(...args) {
+    return controlsEnvironment.create_button(...args);
 }
 
-function createTextInput(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
-    return controlsEnvironment.create_text_input(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize);
+function createTextInput(...args) {
+    return controlsEnvironment.create_text_input(...args);
 }
 
-function getTextInputText(textInputId, buffer, bufferSize) {
-    return controlsEnvironment.get_text_input_text(textInputId, buffer, bufferSize);
+function getTextInputText(...args) {
+    return controlsEnvironment.get_text_input_text(...args);
 }
 
 mergeInto(LibraryManager.library, {

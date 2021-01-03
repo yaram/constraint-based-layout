@@ -39,15 +39,30 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         dataView.setFloat32(height, frame.offsetHeight, true);
     }
 
-    function clearControls() {
+    function packedColorToCSS(packedColor) {
+        return `rgba(${packedColor & 0xFF}, ${packedColor >> 8 & 0xFF}, ${packedColor >> 16 & 0xFF}, ${(packedColor >> 24 & 0xFF) / 0xFF * 1})`;
+    }
+
+    function clearControls(backgroundColor) {
         for(const id in controls) {
             frame.removeChild(controls[id]);
 
             delete controls[id];
         }
+
+        frame.style.backgroundColor = packedColorToCSS(backgroundColor);
     }
 
-    function createLabel(x, y, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
+    function createLabel(
+        x,
+        y,
+        textData,
+        textLength,
+        fontFamilyData,
+        fontFamilyLength,
+        fontSize,
+        textColor
+    ) {
         const element = document.createElement('div');
 
         element.style.position = 'absolute';
@@ -67,7 +82,9 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         element.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
         element.style.fontSize = fontSize + 'px';
 
-        element.innerHTML = decodeString(textData, textLength);
+        element.style.color = packedColorToCSS(textColor);
+
+        element.appendChild(document.createTextNode(decodeString(textData, textLength)));
 
         frame.appendChild(element);
 
@@ -80,7 +97,21 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         return id;
     }
 
-    function createButton(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
+    function createButton(
+        x,
+        y,
+        width,
+        height,
+        textData,
+        textLength,
+        fontFamilyData,
+        fontFamilyLength,
+        fontSize,
+        textColor,
+        backgroundColor,
+        borderSize,
+        borderColor
+    ) {
         const element = document.createElement('button');
 
         element.style.position = 'absolute';
@@ -105,7 +136,15 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         element.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
         element.style.fontSize = fontSize + 'px';
 
-        element.innerHTML = decodeString(textData, textLength);
+        element.style.color = packedColorToCSS(textColor);
+
+        element.style.backgroundColor = packedColorToCSS(backgroundColor);
+
+        element.style.borderStyle = 'solid';
+        element.style.borderWidth = borderSize + 'px';
+        element.style.borderColor = packedColorToCSS(borderColor);
+
+        element.appendChild(document.createTextNode(decodeString(textData, textLength)));
 
         frame.appendChild(element);
 
@@ -120,7 +159,21 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         return id;
     }
 
-    function createTextInput(x, y, width, height, textData, textLength, fontFamilyData, fontFamilyLength, fontSize) {
+    function createTextInput(
+        x,
+        y,
+        width,
+        height,
+        textData,
+        textLength,
+        fontFamilyData,
+        fontFamilyLength,
+        fontSize,
+        textColor,
+        backgroundColor,
+        borderSize,
+        borderColor
+    ) {
         const element = document.createElement('input');
 
         element.type = 'text';
@@ -142,6 +195,14 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
 
         element.style.fontFamily = decodeString(fontFamilyData, fontFamilyLength);
         element.style.fontSize = fontSize + 'px';
+
+        element.style.color = packedColorToCSS(textColor);
+
+        element.style.backgroundColor = packedColorToCSS(backgroundColor);
+
+        element.style.borderStyle = 'solid';
+        element.style.borderWidth = borderSize + 'px';
+        element.style.borderColor = packedColorToCSS(borderColor);
 
         frame.appendChild(element);
 

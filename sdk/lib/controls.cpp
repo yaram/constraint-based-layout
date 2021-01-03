@@ -3,8 +3,12 @@
 bool first_layout = true;
 LayoutContext global_layout_context;
 
+static int pack_color(Color color) {
+    return (int)(color.red * 0xFF) | (int)(color.green * 0xFF) << 8 | (int)(color.blue * 0xFF) << 16 | (int)(color.alpha * 0xFF) << 24;
+}
+
 void perform_layout(LayoutContext *context) {
-    clear_controls();
+    clear_controls(pack_color(context->background_color));
 
     solve_arithmetic_constraints(&context->arithmetic_context);
 
@@ -16,7 +20,8 @@ void perform_layout(LayoutContext *context) {
             label.text.length,
             label.font_family.data,
             label.font_family.length,
-            label.font_size
+            label.font_size,
+            pack_color(label.style->text_color)
         );
     }
 
@@ -30,7 +35,11 @@ void perform_layout(LayoutContext *context) {
             button.text.length,
             button.font_family.data,
             button.font_family.length,
-            button.font_size
+            button.font_size,
+            pack_color(button.style->text_color),
+            pack_color(button.style->background_color),
+            button.style->border_size,
+            pack_color(button.style->border_color)
         );
     }
 
@@ -44,7 +53,11 @@ void perform_layout(LayoutContext *context) {
             text_input.text.length,
             text_input.font_family.data,
             text_input.font_family.length,
-            text_input.font_size
+            text_input.font_size,
+            pack_color(text_input.style->text_color),
+            pack_color(text_input.style->background_color),
+            text_input.style->border_size,
+            pack_color(text_input.style->border_color)
         );
     }
 

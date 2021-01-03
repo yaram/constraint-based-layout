@@ -19,7 +19,7 @@ namespace ConstraintSDK {
         );
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void clear_controls();
+        public static extern void clear_controls(int background_color);
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr create_label(
@@ -29,7 +29,8 @@ namespace ConstraintSDK {
             UIntPtr text_length,
             byte[] font_family_data,
             UIntPtr font_family_length,
-            float font_size
+            float font_size,
+            int text_color
         );
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
@@ -42,7 +43,11 @@ namespace ConstraintSDK {
             UIntPtr text_length,
             byte[] font_family_data,
             UIntPtr font_family_length,
-            float font_size
+            float font_size,
+            int text_color,
+            int background_color,
+            float border_size,
+            int border_color
         );
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
@@ -55,7 +60,11 @@ namespace ConstraintSDK {
             UIntPtr text_length,
             byte[] font_family_data,
             UIntPtr font_family_length,
-            float font_size
+            float font_size,
+            int text_color,
+            int background_color,
+            float border_size,
+            int border_color
         );
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]

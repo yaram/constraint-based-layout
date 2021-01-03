@@ -17,6 +17,17 @@ inline String operator ""_S(const char *data, size_t length) {
     };
 }
 
+struct Color {
+    float red;
+    float green;
+    float blue;
+    float alpha;
+};
+
+struct LabelStyle {
+    Color text_color;
+};
+
 struct Label {
     ArithmeticVariable x;
     ArithmeticVariable y;
@@ -26,7 +37,18 @@ struct Label {
     String font_family;
     float font_size;
 
+    LabelStyle *style;
+
     control_t *control;
+};
+
+struct ButtonStyle {
+    Color text_color;
+
+    Color background_color;
+
+    float border_size;
+    Color border_color;
 };
 
 struct Button {
@@ -41,9 +63,20 @@ struct Button {
     String font_family;
     float font_size;
 
+    ButtonStyle *style;
+
     control_t *control;
 
     void (*press_handler)();
+};
+
+struct TextInputStyle {
+    Color text_color;
+
+    Color background_color;
+
+    float border_size;
+    Color border_color;
 };
 
 struct TextInput {
@@ -58,6 +91,8 @@ struct TextInput {
     String font_family;
     float font_size;
 
+    TextInputStyle *style;
+
     control_t *control;
 
     void (*change_handler)(String text);
@@ -69,6 +104,26 @@ struct LayoutContext {
     List<Label> labels;
     List<Button> buttons;
     List<TextInput> text_inputs;
+
+    Color background_color { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    LabelStyle default_label_style {
+        { 0.0f, 0.0f, 0.0f, 1.0f }
+    };
+
+    ButtonStyle default_button_style {
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 0.9f, 0.9f, 0.9f, 1.0f },
+        1.0f,
+        { 0.7f, 0.7f, 0.7f, 1.0f }
+    };
+
+    TextInputStyle default_text_input_style {
+        { 0.0f, 0.0f, 0.0f, 1.0f },
+        { 1.0f, 1.0f, 1.0f, 1.0f },
+        1.0f,
+        { 0.7f, 0.7f, 0.7f, 1.0f }
+    };
 
     void (*frame_resize_handler)(float width, float height);
 };
@@ -89,7 +144,8 @@ inline Label *create_label(LayoutContext *context, String text, String font_fami
         create_new_variable(&context->arithmetic_context),
         text,
         font_family,
-        font_size
+        font_size,
+        &context->default_label_style
     });
 
     return &context->labels[index];
@@ -135,7 +191,8 @@ inline Button *create_button(LayoutContext *context, String text, String font_fa
         create_new_variable(&context->arithmetic_context),
         text,
         font_family,
-        font_size
+        font_size,
+        &context->default_button_style
     });
 
     return &context->buttons[index];
@@ -181,7 +238,8 @@ inline TextInput *create_text_input(LayoutContext *context, String text, String 
         create_new_variable(&context->arithmetic_context),
         text,
         font_family,
-        font_size
+        font_size,
+        &context->default_text_input_style
     });
 
     return &context->text_inputs[index];

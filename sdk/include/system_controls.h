@@ -20,7 +20,7 @@ void get_frame_size(float *width, float *height);
 
 void frame_resize_handler();
 
-void clear_controls();
+void clear_controls(int background_color);
 
 control_t *create_label(
     float x,
@@ -29,7 +29,8 @@ control_t *create_label(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color
 );
 
 control_t *create_button(
@@ -41,7 +42,11 @@ control_t *create_button(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color,
+    int background_color,
+    float border_size,
+    int border_color
 );
 
 void button_press_handler(control_t *button);
@@ -55,7 +60,11 @@ control_t *create_text_input(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color,
+    int background_color,
+    float border_size,
+    int border_color
 );
 
 size_t get_text_input_text(control_t *text_input, char *buffer, size_t buffer_size);

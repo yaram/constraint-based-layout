@@ -217,7 +217,7 @@ extern "C" void get_frame_size(float *width, float *height) {
     *height = (float)(client_rect.bottom - client_rect.top);
 }
 
-extern "C" void clear_controls() {
+extern "C" void clear_controls(int background_color) {
     for(auto control : controls) {
         DestroyWindow(control.window);
     }
@@ -232,7 +232,8 @@ extern "C" control_t *create_label(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color
 ) {
     auto font = get_windows_font(font_family_data, font_family_length, (int)font_size);
 
@@ -287,7 +288,11 @@ extern "C" control_t *create_button(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color,
+    int background_color,
+    float border_size,
+    int border_color
 ) {
     wchar_t *wide_data;
     size_t wide_length;
@@ -333,7 +338,11 @@ extern "C" control_t *create_text_input(
     size_t text_length,
     const char *font_family_data,
     size_t font_family_length,
-    float font_size
+    float font_size,
+    int text_color,
+    int background_color,
+    float border_size,
+    int border_color
 ) {
     auto text_input = CreateWindowExW(
         0,
