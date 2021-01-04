@@ -20,6 +20,9 @@ void increment_press_handler() {
 }
 
 void frame_resize_handler(float width, float height) {
+    frame_width = width;
+    frame_height = height;
+
     render();
 }
 
