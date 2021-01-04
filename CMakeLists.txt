@@ -105,20 +105,22 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_HOST_SYSTEM_PROCESSOR}
         BUILD_ALWAYS true
     )
 
-    add_custom_target(
-        windows_csharp
-        COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\"" "\"SDK_NUGET_PACKAGE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/csharp/bin/${DOTNET_CONFIGURATION}\""
-        dotnet publish
-        -t:LinkNative
-        --packages ${CMAKE_CURRENT_BINARY_DIR}/nuget_packages
-        -r win-x64
-        -c ${DOTNET_CONFIGURATION}
-        "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/windows_csharp/Example.csproj\""
-    )
+    if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
+        add_custom_target(
+            windows_csharp
+            COMMAND cmake -E env "\"NATIVEAOT_ROOT=${NATIVEAOT_ROOT}\"" "\"SDK_NUGET_PACKAGE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/csharp/bin/${DOTNET_CONFIGURATION}\""
+            dotnet publish
+            -t:LinkNative
+            --packages ${CMAKE_CURRENT_BINARY_DIR}/nuget_packages
+            -r win-x64
+            -c ${DOTNET_CONFIGURATION}
+            "\"${CMAKE_CURRENT_SOURCE_DIR}/examples/windows_csharp/Example.csproj\""
+        )
 
-    add_dependencies(windows_csharp sdk_nuget_package)
+        add_dependencies(windows_csharp sdk_nuget_package)
 
-    add_dependencies(examples windows_csharp)
+        add_dependencies(examples windows_csharp)
+    endif()
 endif()
 
 add_dependencies(examples windows_cpp)

@@ -24,11 +24,43 @@ struct Color {
     float alpha;
 };
 
+struct ContainerStyle {
+    Color background_color;
+
+    float border_size;
+    Color border_color;
+};
+
+struct LabelStyle;
+struct ButtonStyle;
+struct TextInputStyle;
+
+struct Container {
+    Container *parent;
+
+    ArithmeticVariable x;
+    ArithmeticVariable y;
+
+    ArithmeticVariable width;
+    ArithmeticVariable height;
+
+    ContainerStyle *style;
+
+    ContainerStyle *default_container_style;
+    LabelStyle *default_label_style;
+    ButtonStyle *default_button_style;
+    TextInputStyle *default_text_input_style;
+
+    container_t *control;
+};
+
 struct LabelStyle {
     Color text_color;
 };
 
 struct Label {
+    Container *container;
+
     ArithmeticVariable x;
     ArithmeticVariable y;
 
@@ -39,7 +71,7 @@ struct Label {
 
     LabelStyle *style;
 
-    control_t *control;
+    label_t *control;
 };
 
 struct ButtonStyle {
@@ -52,6 +84,8 @@ struct ButtonStyle {
 };
 
 struct Button {
+    Container *container;
+
     ArithmeticVariable x;
     ArithmeticVariable y;
 
@@ -65,7 +99,7 @@ struct Button {
 
     ButtonStyle *style;
 
-    control_t *control;
+    button_t *control;
 
     void (*press_handler)();
 };
@@ -80,6 +114,8 @@ struct TextInputStyle {
 };
 
 struct TextInput {
+    Container *container;
+
     ArithmeticVariable x;
     ArithmeticVariable y;
 
@@ -93,7 +129,7 @@ struct TextInput {
 
     TextInputStyle *style;
 
-    control_t *control;
+    text_input_t *control;
 
     void (*change_handler)(String text);
 };
@@ -101,11 +137,18 @@ struct TextInput {
 struct LayoutContext {
     ArithmeticContext arithmetic_context;
 
-    List<Label> labels;
-    List<Button> buttons;
-    List<TextInput> text_inputs;
+    List<Container*> containers;
+    List<Label*> labels;
+    List<Button*> buttons;
+    List<TextInput*> text_inputs;
 
     Color background_color { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    ContainerStyle default_container_style {
+        { 0.0f, 0.0f, 0.0f, 0.0f },
+        0.0f,
+        { 0.0f, 0.0f, 0.0f, 0.0f }
+    };
 
     LabelStyle default_label_style {
         { 0.0f, 0.0f, 0.0f, 1.0f }
@@ -138,17 +181,77 @@ inline float get_text_width(String text, String font_family, float font_size) {
     );
 }
 
-inline Label *create_label(LayoutContext *context, String text, String font_family, float font_size) {
-    auto index = append(&context->labels, {
+inline Container *create_container(LayoutContext *context, Container *parent) {
+    Container container {
+        parent,
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr
+    };
+
+    auto container_pointer = (Container*)allocate(sizeof(Container));
+    *container_pointer = container;
+
+    append(&context->containers, container_pointer);
+
+    return container_pointer;
+}
+
+inline ArithmeticVariable left(Container *container) {
+    return container->x;
+}
+
+inline ArithmeticVariable top(Container *container) {
+    return container->y;
+}
+
+inline ArithmeticVariable width(Container *container) {
+    return container->width;
+}
+
+inline ArithmeticVariable height(Container *container) {
+    return container->height;
+}
+
+inline ArithmeticExpression right(Container *container) {
+    return left(container) + width(container);
+}
+
+inline ArithmeticExpression bottom(Container *container) {
+    return top(container) + height(container);
+}
+
+inline ArithmeticExpression horizontal_middle(Container *container) {
+    return left(container) + width(container) / 2;
+}
+
+inline ArithmeticExpression vertical_middle(Container *container) {
+    return top(container) + height(container) / 2;
+}
+
+inline Label *create_label(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    Label label {
+        container,
         create_new_variable(&context->arithmetic_context),
         create_new_variable(&context->arithmetic_context),
         text,
         font_family,
         font_size,
-        &context->default_label_style
-    });
+        nullptr
+    };
 
-    return &context->labels[index];
+    auto label_pointer = (Label*)allocate(sizeof(Label));
+    *label_pointer = label;
+
+    append(&context->labels, label_pointer);
+
+    return label_pointer;
 }
 
 inline ArithmeticVariable left(Label *label) {
@@ -183,8 +286,9 @@ inline ArithmeticExpression vertical_middle(Label *label) {
     return top(label) + height(label) / 2;
 }
 
-inline Button *create_button(LayoutContext *context, String text, String font_family, float font_size) {
-    auto index = append(&context->buttons, {
+inline Button *create_button(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    Button button {
+        container,
         create_new_variable(&context->arithmetic_context),
         create_new_variable(&context->arithmetic_context),
         create_new_variable(&context->arithmetic_context),
@@ -192,10 +296,15 @@ inline Button *create_button(LayoutContext *context, String text, String font_fa
         text,
         font_family,
         font_size,
-        &context->default_button_style
-    });
+        nullptr
+    };
 
-    return &context->buttons[index];
+    auto button_pointer = (Button*)allocate(sizeof(Button));
+    *button_pointer = button;
+
+    append(&context->buttons, button_pointer);
+
+    return button_pointer;
 }
 
 inline ArithmeticVariable left(Button *button) {
@@ -230,8 +339,9 @@ inline ArithmeticExpression vertical_middle(Button *button) {
     return top(button) + height(button) / 2;
 }
 
-inline TextInput *create_text_input(LayoutContext *context, String text, String font_family, float font_size) {
-    auto index = append(&context->text_inputs, {
+inline TextInput *create_text_input(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    TextInput text_input {
+        container,
         create_new_variable(&context->arithmetic_context),
         create_new_variable(&context->arithmetic_context),
         create_new_variable(&context->arithmetic_context),
@@ -239,10 +349,15 @@ inline TextInput *create_text_input(LayoutContext *context, String text, String 
         text,
         font_family,
         font_size,
-        &context->default_text_input_style
-    });
+        nullptr
+    };
 
-    return &context->text_inputs[index];
+    auto text_input_pointer = (TextInput*)allocate(sizeof(TextInput));
+    *text_input_pointer = text_input;
+
+    append(&context->text_inputs, text_input_pointer);
+
+    return text_input_pointer;
 }
 
 inline ArithmeticVariable left(TextInput *text_input) {

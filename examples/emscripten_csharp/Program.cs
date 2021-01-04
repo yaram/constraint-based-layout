@@ -18,12 +18,14 @@ public static class Program {
             Render();
         };
 
-        var testLabel = new Label(context, TestText, "sans-serif", 20);
+        var content = new Container(context, null);
 
-        var countLabel = new Label(context, Count.ToString(), "sans-serif", 20);
+        var testLabel = new Label(context, content, TestText, "sans-serif", 20);
+
+        var countLabel = new Label(context, content, Count.ToString(), "sans-serif", 20);
         var countLabelWidth = LayoutContext.GetTextWidth(countLabel.Text, countLabel.FontFamily, countLabel.FontSize);
 
-        var incrementButton = new Button(context, "Increment", "sans-serif", 20);
+        var incrementButton = new Button(context, content, "Increment", "sans-serif", 20);
         var incrementButtonTextWidth = LayoutContext.GetTextWidth(incrementButton.Text, incrementButton.FontFamily, incrementButton.FontSize);
 
         incrementButton.Press += () => {
@@ -32,7 +34,7 @@ public static class Program {
             Render();
         };
 
-        var testTextInput = new TextInput(context, TestText, "sans-serif", 20);
+        var testTextInput = new TextInput(context, content, TestText, "sans-serif", 20);
 
         testTextInput.Change += text => {
             TestText = text;
@@ -43,22 +45,29 @@ public static class Program {
         var padding = 8.0f;
 
         context.AddConstraints(
-            testTextInput.Width == FrameWidth / 3,
-            testTextInput.Height == testTextInput.FontSize + padding * 2,
+            content.HorizontalMiddle == FrameWidth / 2,
+            content.VerticalMiddle == FrameHeight / 2,
 
-            testTextInput.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            testLabel.Top == 0,
+
+            content.Width == incrementButton.Width * 1,
+            content.Height == testTextInput.Bottom - testLabel.Top,
+
+            testTextInput.Width == FrameWidth / 3,
+            testTextInput.Height == testTextInput.FontSize+ padding * 2,
+
+            testTextInput.HorizontalMiddle == content.Width / 2,
             testTextInput.Top == incrementButton.Bottom + padding,
 
             incrementButton.Width == FrameWidth / 2,
             incrementButton.Height == incrementButton.FontSize + padding * 2,
 
-            incrementButton.HorizontalMiddle == FrameWidth / 2,
-            incrementButton.Top - (incrementButton.Top - countLabel.Bottom) / 2 == FrameHeight / 2,
+            incrementButton.HorizontalMiddle == content.Width / 2,
 
-            countLabel.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            countLabel.HorizontalMiddle == content.Width / 2,
             countLabel.Bottom == incrementButton.Top - padding,
 
-            testLabel.HorizontalMiddle == incrementButton.HorizontalMiddle,
+            testLabel.HorizontalMiddle == content.Width / 2,
             testLabel.Bottom == countLabel.Top - padding
         );
 

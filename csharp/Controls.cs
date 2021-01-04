@@ -25,6 +25,56 @@ namespace ConstraintSDK.Controls {
         }
     }
 
+    public class Container {
+        public class Style {
+            public Color BackgroundColor;
+
+            public float BorderSize;
+            public Color BorderColor;
+
+            public Style(Color backgroundColor, float borderSize, Color borderColor) {
+                BackgroundColor = backgroundColor;
+                BorderSize = borderSize;
+                BorderColor = borderColor;
+            }
+        }
+
+        public Container Parent;
+
+        public ArithmeticVariable Left;
+        public ArithmeticVariable Top;
+
+        public ArithmeticVariable Width;
+        public ArithmeticVariable Height;
+
+        public ArithmeticExpression Right { get { return Left + Width; } }
+        public ArithmeticExpression Bottom { get { return Top + Height; } }
+
+        public ArithmeticExpression HorizontalMiddle { get { return Left + Width / 2; } }
+        public ArithmeticExpression VerticalMiddle { get { return Top + Height / 2; } }
+
+        public Style LocalStyle = null;
+
+        public Container.Style DefaultContainerStyle = null;
+        public Label.Style DefaultLabelStyle = null;
+        public Button.Style DefaultButtonStyle = null;
+        public TextInput.Style DefaultTextInputStyle = null;
+
+        public UIntPtr Control = UIntPtr.Zero;
+
+        public Container(LayoutContext context, Container parent) {
+            Parent = parent;
+
+            Left = new ArithmeticVariable(context.ArithmeticContext);
+            Top = new ArithmeticVariable(context.ArithmeticContext);
+
+            Width = new ArithmeticVariable(context.ArithmeticContext);
+            Height = new ArithmeticVariable(context.ArithmeticContext);
+
+            context.Containers.Add(this);
+        }
+    }
+
     public class Label {
         public class Style {
             public Color TextColor;
@@ -33,6 +83,8 @@ namespace ConstraintSDK.Controls {
                 TextColor = textColor;
             }
         }
+
+        public Container Container;
 
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
@@ -51,11 +103,13 @@ namespace ConstraintSDK.Controls {
         public string FontFamily;
         public float FontSize;
 
-        public Style CurrentStyle;
+        public Style LocalStyle = null;
 
         public UIntPtr Control = UIntPtr.Zero;
 
-        public Label(LayoutContext context, string text, string fontFamily, float fontSize) {
+        public Label(LayoutContext context, Container container, string text, string fontFamily, float fontSize) {
+            Container = container;
+
             Left = new ArithmeticVariable(context.ArithmeticContext);
             Top = new ArithmeticVariable(context.ArithmeticContext);
 
@@ -63,8 +117,6 @@ namespace ConstraintSDK.Controls {
 
             FontFamily = fontFamily;
             FontSize = fontSize;
-
-            CurrentStyle = context.DefaultLabelStyle;
 
             context.Labels.Add(this);
         }
@@ -87,6 +139,8 @@ namespace ConstraintSDK.Controls {
             }
         }
 
+        public Container Container;
+
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
 
@@ -104,13 +158,15 @@ namespace ConstraintSDK.Controls {
         public string FontFamily;
         public float FontSize;
 
-        public Style CurrentStyle;
+        public Style LocalStyle = null;
 
         public event Action Press = null;
 
         public UIntPtr Control = UIntPtr.Zero;
 
-        public Button(LayoutContext context, string text, string fontFamily, float fontSize) {
+        public Button(LayoutContext context, Container container, string text, string fontFamily, float fontSize) {
+            Container = container;
+
             Left = new ArithmeticVariable(context.ArithmeticContext);
             Top = new ArithmeticVariable(context.ArithmeticContext);
 
@@ -121,8 +177,6 @@ namespace ConstraintSDK.Controls {
 
             FontFamily = fontFamily;
             FontSize = fontSize;
-
-            CurrentStyle = context.DefaultButtonStyle;
 
             context.Buttons.Add(this);
         }
@@ -151,6 +205,8 @@ namespace ConstraintSDK.Controls {
             }
         }
 
+        public Container Container;
+
         public ArithmeticVariable Left;
         public ArithmeticVariable Top;
 
@@ -168,13 +224,15 @@ namespace ConstraintSDK.Controls {
         public string FontFamily;
         public float FontSize;
 
-        public Style CurrentStyle;
+        public Style LocalStyle = null;
 
         public event Action<string> Change = null;
 
         public UIntPtr Control = UIntPtr.Zero;
 
-        public TextInput(LayoutContext context, string text, string fontFamily, float fontSize) {
+        public TextInput(LayoutContext context, Container container, string text, string fontFamily, float fontSize) {
+            Container = container;
+
             Left = new ArithmeticVariable(context.ArithmeticContext);
             Top = new ArithmeticVariable(context.ArithmeticContext);
 
@@ -185,8 +243,6 @@ namespace ConstraintSDK.Controls {
 
             FontFamily = fontFamily;
             FontSize = fontSize;
-
-            CurrentStyle = context.DefaultTextInputStyle;
 
             context.TextInputs.Add(this);
         }
@@ -211,11 +267,18 @@ namespace ConstraintSDK.Controls {
 
         public ArithmeticContext ArithmeticContext = new ArithmeticContext();
 
+        public List<Container> Containers = new List<Container>();
         public List<Label> Labels = new List<Label>();
         public List<Button> Buttons = new List<Button>();
         public List<TextInput> TextInputs = new List<TextInput>();
 
         public Color BackgroundColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+        public Container.Style DefaultContainerStyle = new Container.Style(
+            new Color(0.0f, 0.0f, 0.0f, 0.0f),
+            0.0f,
+            new Color(0.0f, 0.0f, 0.0f, 0.0f)
+        );
 
         public Label.Style DefaultLabelStyle = new Label.Style(
             new Color(0.0f, 0.0f, 0.0f, 1.0f)
@@ -242,11 +305,93 @@ namespace ConstraintSDK.Controls {
 
             ArithmeticContext.Solve();
 
+            foreach(var container in Containers) {
+                UIntPtr parentControl;
+                if(container.Parent != null) {
+                    parentControl = container.Parent.Control;
+                } else {
+                    parentControl = UIntPtr.Zero;
+                }
+
+                Container.Style style;
+                if(container.LocalStyle == null) {
+                    var parent = container.Parent;
+
+                    while(true) {
+                        if(parent != null) {
+                            if(parent.DefaultContainerStyle != null) {
+                                style = parent.DefaultContainerStyle;
+                            } else if(parent.Parent != null) {
+                                parent = parent.Parent;
+
+                                continue;
+                            } else {
+                                style = DefaultContainerStyle;
+
+                                break;
+                            }
+                        } else {
+                            style = DefaultContainerStyle;
+
+                            break;
+                        }
+                    }
+                } else {
+                    style = container.LocalStyle;
+                }
+
+                container.Control = create_container(
+                    parentControl,
+                    container.Left.Value,
+                    container.Top.Value,
+                    container.Width.Value,
+                    container.Height.Value,
+                    style.BackgroundColor.Pack(),
+                    style.BorderSize,
+                    style.BorderColor.Pack()
+                );
+            }
+
             foreach(var label in Labels) {
+                UIntPtr containerControl;
+                if(label.Container != null) {
+                    containerControl = label.Container.Control;
+                } else {
+                    containerControl = UIntPtr.Zero;
+                }
+
+                Label.Style style;
+                if(label.LocalStyle == null) {
+                    var container = label.Container;
+
+                    while(true) {
+                        if(container != null) {
+                            if(container.DefaultLabelStyle != null) {
+                                style = container.DefaultLabelStyle;
+                            } else if(container.Parent != null) {
+                                container = container.Parent;
+
+                                continue;
+                            } else {
+                                style = DefaultLabelStyle;
+
+                                break;
+                            }
+                        } else {
+                            style = DefaultLabelStyle;
+
+                            break;
+                        }
+                    }
+                } else {
+                    style = label.LocalStyle;
+                }
+
                 var textBytes = Encoding.UTF8.GetBytes(label.Text);
                 var fontFamilyBytes = Encoding.UTF8.GetBytes(label.FontFamily);
 
                 label.Control = create_label(
+                    containerControl,
                     label.Left.Value,
                     label.Top.Value,
                     textBytes,
@@ -254,15 +399,50 @@ namespace ConstraintSDK.Controls {
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
                     label.FontSize,
-                    label.CurrentStyle.TextColor.Pack()
+                    style.TextColor.Pack()
                 );
             }
 
             foreach(var button in Buttons) {
+                UIntPtr containerControl;
+                if(button.Container != null) {
+                    containerControl = button.Container.Control;
+                } else {
+                    containerControl = UIntPtr.Zero;
+                }
+
+                Button.Style style;
+                if(button.LocalStyle == null) {
+                    var container = button.Container;
+
+                    while(true) {
+                        if(container != null) {
+                            if(container.DefaultButtonStyle != null) {
+                                style = container.DefaultButtonStyle;
+                            } else if(container.Parent != null) {
+                                container = container.Parent;
+
+                                continue;
+                            } else {
+                                style = DefaultButtonStyle;
+
+                                break;
+                            }
+                        } else {
+                            style = DefaultButtonStyle;
+
+                            break;
+                        }
+                    }
+                } else {
+                    style = button.LocalStyle;
+                }
+
                 var textBytes = Encoding.UTF8.GetBytes(button.Text);
                 var fontFamilyBytes = Encoding.UTF8.GetBytes(button.FontFamily);
 
                 button.Control = create_button(
+                    containerControl,
                     button.Left.Value,
                     button.Top.Value,
                     button.Width.Value,
@@ -272,18 +452,53 @@ namespace ConstraintSDK.Controls {
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
                     button.FontSize,
-                    button.CurrentStyle.TextColor.Pack(),
-                    button.CurrentStyle.BackgroundColor.Pack(),
-                    button.CurrentStyle.BorderSize,
-                    button.CurrentStyle.BorderColor.Pack()
+                    style.TextColor.Pack(),
+                    style.BackgroundColor.Pack(),
+                    style.BorderSize,
+                    style.BorderColor.Pack()
                 );
             }
 
             foreach(var textInput in TextInputs) {
+                UIntPtr containerControl;
+                if(textInput.Container != null) {
+                    containerControl = textInput.Container.Control;
+                } else {
+                    containerControl = UIntPtr.Zero;
+                }
+
+                TextInput.Style style;
+                if(textInput.LocalStyle == null) {
+                    var container = textInput.Container;
+
+                    while(true) {
+                        if(container != null) {
+                            if(container.DefaultTextInputStyle != null) {
+                                style = container.DefaultTextInputStyle;
+                            } else if(container.Parent != null) {
+                                container = container.Parent;
+
+                                continue;
+                            } else {
+                                style = DefaultTextInputStyle;
+
+                                break;
+                            }
+                        } else {
+                            style = DefaultTextInputStyle;
+
+                            break;
+                        }
+                    }
+                } else {
+                    style = textInput.LocalStyle;
+                }
+
                 var textBytes = Encoding.UTF8.GetBytes(textInput.Text);
                 var fontFamilyBytes = Encoding.UTF8.GetBytes(textInput.FontFamily);
 
                 textInput.Control = create_text_input(
+                    containerControl,
                     textInput.Left.Value,
                     textInput.Top.Value,
                     textInput.Width.Value,
@@ -293,10 +508,10 @@ namespace ConstraintSDK.Controls {
                     fontFamilyBytes,
                     (UIntPtr)fontFamilyBytes.Length,
                     textInput.FontSize,
-                    textInput.CurrentStyle.TextColor.Pack(),
-                    textInput.CurrentStyle.BackgroundColor.Pack(),
-                    textInput.CurrentStyle.BorderSize,
-                    textInput.CurrentStyle.BorderColor.Pack()
+                    style.TextColor.Pack(),
+                    style.BackgroundColor.Pack(),
+                    style.BorderSize,
+                    style.BorderColor.Pack()
                 );
             }
 

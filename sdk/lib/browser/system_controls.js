@@ -45,7 +45,7 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
 
     function clearControls(backgroundColor) {
         for(const id in controls) {
-            frame.removeChild(controls[id]);
+            controls[id].parentNode.removeChild(controls[id]);
 
             delete controls[id];
         }
@@ -53,7 +53,51 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         frame.style.backgroundColor = packedColorToCSS(backgroundColor);
     }
 
+    function createContainer(
+        parent,
+        x,
+        y,
+        width,
+        height,
+        backgroundColor,
+        borderSize,
+        borderColor
+    ) {
+        const element = document.createElement('div');
+
+        element.style.position = 'absolute';
+
+        element.style.boxSizing = 'border-box';
+
+        element.style.left = x + 'px';
+        element.style.top = y + 'px';
+
+        element.style.width = width + 'px';
+        element.style.height = height + 'px';
+
+        element.style.backgroundColor = packedColorToCSS(backgroundColor);
+
+        element.style.borderStyle = 'solid';
+        element.style.borderWidth = borderSize + 'px';
+        element.style.borderColor = packedColorToCSS(borderColor);
+
+        if(parent != 0) {
+            controls[parent].appendChild(element);
+        } else {
+            frame.appendChild(element);
+        }
+
+        const id = nextControlId;
+
+        controls[id] = element;
+
+        nextControlId += 1;
+
+        return id;
+    }
+
     function createLabel(
+        container,
         x,
         y,
         textData,
@@ -86,7 +130,11 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
 
         element.appendChild(document.createTextNode(decodeString(textData, textLength)));
 
-        frame.appendChild(element);
+        if(container != 0) {
+            controls[container].appendChild(element);
+        } else {
+            frame.appendChild(element);
+        }
 
         const id = nextControlId;
 
@@ -98,6 +146,7 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
     }
 
     function createButton(
+        container,
         x,
         y,
         width,
@@ -146,7 +195,11 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
 
         element.appendChild(document.createTextNode(decodeString(textData, textLength)));
 
-        frame.appendChild(element);
+        if(container != 0) {
+            controls[container].appendChild(element);
+        } else {
+            frame.appendChild(element);
+        }
 
         const id = nextControlId;
 
@@ -160,6 +213,7 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
     }
 
     function createTextInput(
+        container,
         x,
         y,
         width,
@@ -204,7 +258,11 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         element.style.borderWidth = borderSize + 'px';
         element.style.borderColor = packedColorToCSS(borderColor);
 
-        frame.appendChild(element);
+        if(container != 0) {
+            controls[container].appendChild(element);
+        } else {
+            frame.appendChild(element);
+        }
 
         const id = nextControlId;
 
@@ -249,6 +307,7 @@ function initControls(memoryBufferGetter, frame, buttonPressHandler, frameResize
         get_text_width: getTextWidth,
         get_frame_size: getFrameSize,
         clear_controls: clearControls,
+        create_container: createContainer,
         create_label: createLabel,
         create_button: createButton,
         create_text_input: createTextInput,

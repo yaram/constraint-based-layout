@@ -9,7 +9,7 @@ struct Control {
 };
 
 HDC device_context;
-HWND window;
+HWND frame_window;
 
 size_t next_control_index = 0;
 List<Control> controls {};
@@ -45,7 +45,7 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wide_paramet
                 case BN_CLICKED: {
                     for(auto control : controls) {
                         if(control.window == (HWND)long_parameter) {
-                            button_press_handler((control_t*)control.index);
+                            button_press_handler((button_t*)control.index);
 
                             break;
                         }
@@ -57,7 +57,7 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wide_paramet
                 case EN_KILLFOCUS: {
                     for(auto control : controls) {
                         if(control.window == (HWND)long_parameter) {
-                            text_input_change_handler((control_t*)control.index);
+                            text_input_change_handler((text_input_t*)control.index);
 
                             break;
                         }
@@ -84,13 +84,17 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wide_paramet
         } break;
 
         case WM_SIZE: {
-            frame_resize_handler();
+            if(window == frame_window) {
+                frame_resize_handler();
+            }
 
             return DefWindowProcW(window, message, wide_parameter, long_parameter);
         } break;
 
         case WM_DESTROY: {
-            PostQuitMessage(0);
+            if(window == frame_window) {
+                PostQuitMessage(0);
+            }
 
             return 0;
         } break;
@@ -101,10 +105,10 @@ LRESULT CALLBACK window_procedure(HWND window, UINT message, WPARAM wide_paramet
     }
 }
 
+const auto class_name = L"ConstraintSDKClass";
+
 extern "C" void init_system_controls() {
     auto module = GetModuleHandleA(nullptr);
-
-    auto class_name = L"ConstraintSDKClass";
 
     WNDCLASSW window_class_info {};
     window_class_info.style = CS_OWNDC;
@@ -115,7 +119,7 @@ extern "C" void init_system_controls() {
 
     RegisterClassW(&window_class_info);
 
-    window = CreateWindowExW(
+    frame_window = CreateWindowExW(
         0,
         class_name,
         L"Constraint SDK",
@@ -128,7 +132,7 @@ extern "C" void init_system_controls() {
         nullptr
     );
 
-    device_context = GetDC(window);
+    device_context = GetDC(frame_window);
 }
 
 extern "C" bool wait_for_events() {
@@ -211,7 +215,7 @@ extern "C" float get_text_width(
 
 extern "C" void get_frame_size(float *width, float *height) {
     RECT client_rect;
-    GetClientRect(window, &client_rect);
+    GetClientRect(frame_window, &client_rect);
 
     *width = (float)(client_rect.right - client_rect.left);
     *height = (float)(client_rect.bottom - client_rect.top);
@@ -225,7 +229,56 @@ extern "C" void clear_controls(int background_color) {
     controls.count = 0;
 }
 
-extern "C" control_t *create_label(
+extern "C" container_t *create_container(
+    container_t *parent,
+    float x,
+    float y,
+    float width,
+    float height,
+    int background_color,
+    float border_size,
+    int border_color
+) {
+    HWND parent_window;
+    if(parent != nullptr) {
+        for(auto control : controls) {
+            if(control.index == (size_t)parent) {
+                parent_window = control.window;
+
+                break;
+            }
+        }
+    } else {
+        parent_window = frame_window;
+    }
+
+    auto container = CreateWindowExW(
+        0,
+        class_name,
+        nullptr,
+        WS_CHILD | WS_VISIBLE,
+        (int)x, (int)y,
+        (int)width, (int)height,
+        parent_window,
+        nullptr,
+        GetModuleHandleA(nullptr),
+        nullptr
+    );
+
+    auto index = next_control_index;
+
+    append(&controls, {
+        index,
+        container
+    });
+
+    next_control_index += 1;
+
+    return (container_t*)index;
+}
+
+extern "C" label_t *create_label(
+    container_t *container,
     float x,
     float y,
     const char *text_data,
@@ -235,6 +288,19 @@ extern "C" control_t *create_label(
     float font_size,
     int text_color
 ) {
+    HWND parent_window;
+    if(container != nullptr) {
+        for(auto control : controls) {
+            if(control.index == (size_t)container) {
+                parent_window = control.window;
+
+                break;
+            }
+        }
+    } else {
+        parent_window = frame_window;
+    }
+
     auto font = get_windows_font(font_family_data, font_family_length, (int)font_size);
 
     wchar_t *wide_data;
@@ -255,7 +321,7 @@ extern "C" control_t *create_label(
         WS_CHILD | WS_VISIBLE | ES_LEFT,
         (int)x, (int)y,
         text_size.cx, (int)font_size,
-        window,
+        parent_window,
         nullptr,
         GetModuleHandleA(nullptr),
         nullptr
@@ -276,10 +342,11 @@ extern "C" control_t *create_label(
 
     next_control_index += 1;
 
-    return (control_t*)index;
+    return (label_t*)index;
 }
 
-extern "C" control_t *create_button(
+extern "C" button_t *create_button(
+    container_t *container,
     float x,
     float y,
     float width,
@@ -294,6 +361,19 @@ extern "C" control_t *create_button(
     float border_size,
     int border_color
 ) {
+    HWND parent_window;
+    if(container != nullptr) {
+        for(auto control : controls) {
+            if(control.index == (size_t)container) {
+                parent_window = control.window;
+
+                break;
+            }
+        }
+    } else {
+        parent_window = frame_window;
+    }
+
     wchar_t *wide_data;
     size_t wide_length;
     utf8_to_wide_string(text_data, text_length, &wide_data, &wide_length);
@@ -305,7 +385,7 @@ extern "C" control_t *create_button(
         WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
         (int)x, (int)y,
         (int)width, (int)height,
-        window,
+        parent_window,
         nullptr,
         GetModuleHandleA(nullptr),
         nullptr
@@ -326,10 +406,11 @@ extern "C" control_t *create_button(
 
     next_control_index += 1;
 
-    return (control_t*)index;
+    return (button_t*)index;
 }
 
-extern "C" control_t *create_text_input(
+extern "C" text_input_t *create_text_input(
+    container_t *container,
     float x,
     float y,
     float width,
@@ -344,6 +425,19 @@ extern "C" control_t *create_text_input(
     float border_size,
     int border_color
 ) {
+    HWND parent_window;
+    if(container != nullptr) {
+        for(auto control : controls) {
+            if(control.index == (size_t)container) {
+                parent_window = control.window;
+
+                break;
+            }
+        }
+    } else {
+        parent_window = frame_window;
+    }
+
     auto text_input = CreateWindowExW(
         0,
         L"EDIT",
@@ -351,7 +445,7 @@ extern "C" control_t *create_text_input(
         WS_CHILD | WS_VISIBLE,
         (int)x, (int)y,
         (int)width, (int)height,
-        window,
+        parent_window,
         nullptr,
         GetModuleHandleA(nullptr),
         nullptr
@@ -378,10 +472,10 @@ extern "C" control_t *create_text_input(
 
     next_control_index += 1;
 
-    return (control_t*)index;
+    return (text_input_t*)index;
 }
 
-extern "C" size_t get_text_input_text(control_t *text_input, char *buffer, size_t buffer_size) {
+extern "C" size_t get_text_input_text(text_input_t *text_input, char *buffer, size_t buffer_size) {
     for(auto control : controls) {
         if(control.index == (size_t)text_input) {
             auto wide_length = GetWindowTextLengthW(control.window);

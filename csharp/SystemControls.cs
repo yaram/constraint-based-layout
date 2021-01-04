@@ -22,7 +22,20 @@ namespace ConstraintSDK {
         public static extern void clear_controls(int background_color);
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
+        public static extern UIntPtr create_container(
+            UIntPtr parent,
+            float x,
+            float y,
+            float width,
+            float height,
+            int background_color,
+            float border_size,
+            int border_color
+        );
+
+        [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr create_label(
+            UIntPtr container,
             float x,
             float y,
             byte[] text_data,
@@ -35,6 +48,7 @@ namespace ConstraintSDK {
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr create_button(
+            UIntPtr container,
             float x,
             float y,
             float width,
@@ -52,6 +66,7 @@ namespace ConstraintSDK {
 
         [DllImport("__Internal", CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr create_text_input(
+            UIntPtr container,
             float x,
             float y,
             float width,

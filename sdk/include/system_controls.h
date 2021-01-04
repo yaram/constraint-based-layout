@@ -6,8 +6,6 @@
 extern "C" {
 #endif
 
-typedef struct _control_t control_t;
-
 float get_text_width(
     const char *text_data,
     size_t text_length,
@@ -22,7 +20,23 @@ void frame_resize_handler();
 
 void clear_controls(int background_color);
 
-control_t *create_label(
+typedef struct _container_t container_t;
+
+container_t *create_container(
+    container_t *parent,
+    float x,
+    float y,
+    float width,
+    float height,
+    int background_color,
+    float border_size,
+    int border_color
+);
+
+typedef struct _label_t label_t;
+
+label_t *create_label(
+    container_t *container,
     float x,
     float y,
     const char *text_data,
@@ -33,7 +47,10 @@ control_t *create_label(
     int text_color
 );
 
-control_t *create_button(
+typedef struct _button_t button_t;
+
+button_t *create_button(
+    container_t *container,
     float x,
     float y,
     float width,
@@ -49,9 +66,12 @@ control_t *create_button(
     int border_color
 );
 
-void button_press_handler(control_t *button);
+void button_press_handler(button_t *button);
 
-control_t *create_text_input(
+typedef struct _text_input_t text_input_t;
+
+text_input_t *create_text_input(
+    container_t *container,
     float x,
     float y,
     float width,
@@ -67,9 +87,9 @@ control_t *create_text_input(
     int border_color
 );
 
-size_t get_text_input_text(control_t *text_input, char *buffer, size_t buffer_size);
+size_t get_text_input_text(text_input_t *text_input, char *buffer, size_t buffer_size);
 
-void text_input_change_handler(control_t *text_input);
+void text_input_change_handler(text_input_t *text_input);
 
 #ifdef __cplusplus
 }
