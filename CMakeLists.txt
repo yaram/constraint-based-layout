@@ -105,6 +105,8 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_HOST_SYSTEM_PROCESSOR}
         BUILD_ALWAYS true
     )
 
+    add_dependencies(examples windows_cpp)
+
     if(NOT "${NATIVEAOT_ROOT}" STREQUAL "")
         add_custom_target(
             windows_csharp
@@ -122,5 +124,3 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Windows AND ${CMAKE_HOST_SYSTEM_PROCESSOR}
         add_dependencies(examples windows_csharp)
     endif()
 endif()
-
-add_dependencies(examples windows_cpp)
