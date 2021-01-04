@@ -12,51 +12,69 @@ void perform_layout(LayoutContext *context) {
 
     solve_arithmetic_constraints(&context->arithmetic_context);
 
-    for(auto &container : context->containers) {
-        container_t *parent_control;
-        if(container->parent != nullptr) {
-            parent_control = container->parent->control;
-        } else {
-            parent_control = nullptr;
-        }
+    while(true) {
+        auto all_generated = true;
 
-        ContainerStyle style;
-        if(container->style == nullptr) {
-            auto parent = container->parent;
+        for(auto container : context->containers) {
+            if(container->control != nullptr) {
+                continue;
+            }
 
-            while(true) {
-                if(parent != nullptr) {
-                    if(parent->default_container_style != nullptr) {
-                        style = *parent->default_container_style;
-                    } else if(parent->parent != nullptr) {
-                        parent = parent->parent;
+            container_t *parent_control;
+            if(container->parent != nullptr) {
+                if(container->parent->control == nullptr) {
+                    all_generated = false;
 
-                        continue;
+                    continue;
+                }
+
+                parent_control = container->parent->control;
+            } else {
+                parent_control = nullptr;
+            }
+
+            ContainerStyle style;
+            if(container->style == nullptr) {
+                auto parent = container->parent;
+
+                while(true) {
+                    if(parent != nullptr) {
+                        if(parent->default_container_style != nullptr) {
+                            style = *parent->default_container_style;
+                        } else if(parent->parent != nullptr) {
+                            parent = parent->parent;
+
+                            continue;
+                        } else {
+                            style = context->default_container_style;
+
+                            break;
+                        }
                     } else {
                         style = context->default_container_style;
 
                         break;
                     }
-                } else {
-                    style = context->default_container_style;
-
-                    break;
                 }
+            } else {
+                style = *container->style;
             }
-        } else {
-            style = *container->style;
+
+            container->control = create_container(
+                parent_control,
+                get_arithmetic_variable_value(container->x),
+                get_arithmetic_variable_value(container->y),
+                get_arithmetic_variable_value(container->width),
+                get_arithmetic_variable_value(container->height),
+                pack_color(style.background_color),
+                style.border_size,
+                pack_color(style.border_color)
+            );
         }
 
-        container->control = create_container(
-            parent_control,
-            get_arithmetic_variable_value(container->x),
-            get_arithmetic_variable_value(container->y),
-            get_arithmetic_variable_value(container->width),
-            get_arithmetic_variable_value(container->height),
-            pack_color(style.background_color),
-            style.border_size,
-            pack_color(style.border_color)
-        );
+        if(all_generated) {
+            break;
+        }
     }
 
     for(auto label : context->labels) {
@@ -107,7 +125,7 @@ void perform_layout(LayoutContext *context) {
         );
     }
 
-    for(auto &button : context->buttons) {
+    for(auto button : context->buttons) {
         container_t *container_control;
         if(button->container != nullptr) {
             container_control = button->container->control;

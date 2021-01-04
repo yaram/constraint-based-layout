@@ -305,51 +305,71 @@ namespace ConstraintSDK.Controls {
 
             ArithmeticContext.Solve();
 
-            foreach(var container in Containers) {
-                UIntPtr parentControl;
-                if(container.Parent != null) {
-                    parentControl = container.Parent.Control;
-                } else {
-                    parentControl = UIntPtr.Zero;
-                }
+            
 
-                Container.Style style;
-                if(container.LocalStyle == null) {
-                    var parent = container.Parent;
+            while(true) {
+                var allGenerated = true;
 
-                    while(true) {
-                        if(parent != null) {
-                            if(parent.DefaultContainerStyle != null) {
-                                style = parent.DefaultContainerStyle;
-                            } else if(parent.Parent != null) {
-                                parent = parent.Parent;
+                foreach(var container in Containers) {
+                    if(container.Control != UIntPtr.Zero) {
+                        continue;
+                    }
 
-                                continue;
+                    UIntPtr parentControl;
+                    if(container.Parent != null) {
+                        if(container.Parent.Control == UIntPtr.Zero) {
+                            allGenerated = false;
+
+                            continue;
+                        }
+
+                        parentControl = container.Parent.Control;
+                    } else {
+                        parentControl = UIntPtr.Zero;
+                    }
+
+                    Container.Style style;
+                    if(container.LocalStyle == null) {
+                        var parent = container.Parent;
+
+                        while(true) {
+                            if(parent != null) {
+                                if(parent.DefaultContainerStyle != null) {
+                                    style = parent.DefaultContainerStyle;
+                                } else if(parent.Parent != null) {
+                                    parent = parent.Parent;
+
+                                    continue;
+                                } else {
+                                    style = DefaultContainerStyle;
+
+                                    break;
+                                }
                             } else {
                                 style = DefaultContainerStyle;
 
                                 break;
                             }
-                        } else {
-                            style = DefaultContainerStyle;
-
-                            break;
                         }
+                    } else {
+                        style = container.LocalStyle;
                     }
-                } else {
-                    style = container.LocalStyle;
+
+                    container.Control = create_container(
+                        parentControl,
+                        container.Left.Value,
+                        container.Top.Value,
+                        container.Width.Value,
+                        container.Height.Value,
+                        style.BackgroundColor.Pack(),
+                        style.BorderSize,
+                        style.BorderColor.Pack()
+                    );
                 }
 
-                container.Control = create_container(
-                    parentControl,
-                    container.Left.Value,
-                    container.Top.Value,
-                    container.Width.Value,
-                    container.Height.Value,
-                    style.BackgroundColor.Pack(),
-                    style.BorderSize,
-                    style.BorderColor.Pack()
-                );
+                if(allGenerated) {
+                    break;
+                }
             }
 
             foreach(var label in Labels) {
