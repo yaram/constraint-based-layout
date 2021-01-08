@@ -39,19 +39,23 @@ bool solve(
 
         if(no_variables) {
             for(size_t j = 0; j < variable_count; j += 1) {
-                if(constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
+                if(constraint_coefficients[coefficient_index(i, j)] < 0.0f) {
                     no_variables = false;
                     variable_index = j;
 
                     break;
                 }
             }
-        }
 
-        if(no_variables) {
-            constraint_variable_indices[i] = -1;
+            if(no_variables) {
+                if(constraint_constants[i] == 0.0f) {
+                    constraint_variable_indices[i] = -1;
 
-            continue;
+                    continue;
+                } else {
+                    return false;
+                }
+            }
         }
 
         constraint_variable_indices[i] = variable_index;
@@ -64,9 +68,7 @@ bool solve(
         constraint_constants[i] *= reciprocal_coefficient;
 
         for(size_t j = 0; j < variable_count; j += 1) {
-            if(j != variable_index) {
-                constraint_coefficients[coefficient_index(i, j)] *= reciprocal_coefficient;
-            }
+            constraint_coefficients[coefficient_index(i, j)] *= reciprocal_coefficient;
         }
 
         substitute(
