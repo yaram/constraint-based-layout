@@ -13,6 +13,20 @@ static void substitute(size_t variable_count, float *constant, float *coefficien
     }
 }
 
+const float delta = 0.0001f;
+
+static bool is_zero(float value) {
+    return value > -delta && value < delta;
+}
+
+static bool is_positive(float value) {
+    return value > delta;
+}
+
+static bool is_negative(float value) {
+    return value < -delta;
+}
+
 bool solve(
     size_t variable_count,
     size_t constraint_count,
@@ -29,7 +43,7 @@ bool solve(
         size_t variable_index;
 
         for(size_t j = 0; j < variable_count; j += 1) {
-            if(is_variable_external[j] && constraint_coefficients[coefficient_index(i, j)] != 0.0f) {
+            if(is_variable_external[j] && !is_zero(constraint_coefficients[coefficient_index(i, j)])) {
                 no_variables = false;
                 variable_index = j;
 
@@ -38,17 +52,28 @@ bool solve(
         }
 
         if(no_variables) {
-            for(size_t j = 0; j < variable_count; j += 1) {
-                if(constraint_coefficients[coefficient_index(i, j)] < 0.0f) {
-                    no_variables = false;
-                    variable_index = j;
+            if(is_negative(constraint_constants[i])) {
+                for(size_t j = 0; j < variable_count; j += 1) {
+                    if(is_positive(constraint_coefficients[coefficient_index(i, j)])) {
+                        no_variables = false;
+                        variable_index = j;
 
-                    break;
+                        break;
+                    }
+                }
+            } else {
+                for(size_t j = 0; j < variable_count; j += 1) {
+                    if(is_negative(constraint_coefficients[coefficient_index(i, j)])) {
+                        no_variables = false;
+                        variable_index = j;
+
+                        break;
+                    }
                 }
             }
 
             if(no_variables) {
-                if(constraint_constants[i] == 0.0f) {
+                if(is_zero(constraint_constants[i])) {
                     constraint_variable_indices[i] = -1;
 
                     continue;
@@ -101,7 +126,7 @@ bool solve(
         size_t parameter_index;
 
         for(size_t i = 0; i < variable_count; i += 1) {
-            if(objective_coefficients[i] < 0.0) {
+            if(is_negative(objective_coefficients[i])) {
                 all_basic = false;
                 parameter_index = i;
 
@@ -125,7 +150,7 @@ bool solve(
             if(variable_index != -1 && !is_variable_external[variable_index]) {
                 float coefficient = constraint_coefficients[coefficient_index(i, parameter_index)];
 
-                if(coefficient < 0.0f) {
+                if(is_negative(coefficient)) {
                     float ratio = -constraint_constants[i] / coefficient;
 
                     if(first || ratio < minimum_ratio) {
