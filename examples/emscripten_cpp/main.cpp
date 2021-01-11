@@ -70,9 +70,6 @@ void render() {
 
     top(test_label) == 0;
 
-    width(content) == width(increment_button) * 1;
-    height(content) == bottom(test_text_input) - top(test_label);
-
     width(test_text_input) == frame_width / 3;
     height(test_text_input) == test_text_input->font_size + padding * 2;
 

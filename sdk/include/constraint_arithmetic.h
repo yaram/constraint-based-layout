@@ -45,7 +45,11 @@ enum struct ArithmeticInequality {
     GreaterThanOrEqual
 };
 
-void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality inequality, ArithmeticExpression right);
+void add_arithmetic_constraint(
+    ArithmeticExpression left,
+    ArithmeticInequality inequality,
+    ArithmeticExpression right
+);
 
 inline void operator==(ArithmeticExpression left, ArithmeticExpression right) {
     add_arithmetic_constraint(left, ArithmeticInequality::Equal, right);
@@ -326,7 +330,7 @@ inline void operator>=(ArithmeticVariable left, ArithmeticExpression right) {
     left_expression >= right;
 }
 
-void solve_arithmetic_constraints(ArithmeticContext *context);
+bool solve_arithmetic_constraints(ArithmeticContext *context);
 
 float get_arithmetic_variable_value(ArithmeticVariable variable);
 

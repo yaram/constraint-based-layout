@@ -1,7 +1,23 @@
 #include "constraint_arithmetic.h"
 #include "environment.h"
 
-void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality inequality, ArithmeticExpression right) {
+static void expand_coefficients(ArithmeticContext context, size_t *coefficient_count, float **coefficients, size_t manual_variable_count) {
+    auto old_coefficient_count = *coefficient_count;
+
+    *coefficient_count = context.variable_count;
+
+    *coefficients = (float*)reallocate((void*)*coefficients, context.variable_count * sizeof(float));
+
+    for(size_t i = old_coefficient_count; i < context.variable_count - manual_variable_count; i += 1) {
+        (*coefficients)[i] = 0.0f;
+    }
+}
+
+void add_arithmetic_constraint(
+    ArithmeticExpression left,
+    ArithmeticInequality inequality,
+    ArithmeticExpression right
+) {
     if(left.context != right.context) {
         return;
     }
@@ -11,48 +27,29 @@ void add_arithmetic_constraint(ArithmeticExpression left, ArithmeticInequality i
     switch(inequality) {
         case ArithmeticInequality::Equal: break;
 
-        case ArithmeticInequality::LessThanOrEqual: {
-            auto slack_variable = context->variable_count;
-
-            context->variable_count += 1;
-
-            context->is_variable_external = (bool*)reallocate((void*)context->is_variable_external, context->variable_count * sizeof(bool));
-
-            context->is_variable_external[slack_variable] = false;
-
-            auto old_coefficient_count = left.coefficient_count;
-
-            left.coefficient_count = context->variable_count;
-
-            left.coefficients = (float*)reallocate((void*)left.coefficients, context->variable_count * sizeof(float));
-
-            for(size_t i = old_coefficient_count; i < slack_variable; i += 1) {
-                left.coefficients[i] = 0.0f;
-            }
-
-            left.coefficients[slack_variable] = 1.0f;
-        } break;
-
+        case ArithmeticInequality::LessThanOrEqual:
         case ArithmeticInequality::GreaterThanOrEqual: {
             auto slack_variable = context->variable_count;
-
             context->variable_count += 1;
 
             context->is_variable_external = (bool*)reallocate((void*)context->is_variable_external, context->variable_count * sizeof(bool));
 
             context->is_variable_external[slack_variable] = false;
 
-            auto old_coefficient_count = left.coefficient_count;
+            expand_coefficients(*context, &left.coefficient_count, &left.coefficients, 1);
 
-            left.coefficient_count = context->variable_count;
+            float slack_coefficient;
+            switch(inequality) {
+                case ArithmeticInequality::LessThanOrEqual: {
+                    slack_coefficient = 1.0f;
+                } break;
 
-            left.coefficients = (float*)reallocate((void*)left.coefficients, context->variable_count * sizeof(float));
-
-            for(size_t i = old_coefficient_count; i < slack_variable; i += 1) {
-                left.coefficients[i] = 0.0f;
+                case ArithmeticInequality::GreaterThanOrEqual: {
+                    slack_coefficient = -1.0f;
+                } break;
             }
 
-            left.coefficients[slack_variable] = -1.0f;
+            left.coefficients[slack_variable] = slack_coefficient;
         } break;
     }
 
@@ -81,7 +78,7 @@ ArithmeticExpression operator+(ArithmeticExpression a, ArithmeticExpression b) {
     size_t coefficient_count;
     float *coefficients;
     if(a.coefficient_count > b.coefficient_count) {
-        for(size_t i = 0; i < a.coefficient_count; i += 1) {
+        for(size_t i = 0; i < b.coefficient_count; i += 1) {
             a.coefficients[i] += b.coefficients[i];
         }
 
@@ -90,7 +87,7 @@ ArithmeticExpression operator+(ArithmeticExpression a, ArithmeticExpression b) {
         coefficient_count = a.coefficient_count;
         coefficients = a.coefficients;
     } else {
-        for(size_t i = 0; i < b.coefficient_count; i += 1) {
+        for(size_t i = 0; i < a.coefficient_count; i += 1) {
             b.coefficients[i] += a.coefficients[i];
         }
 
@@ -219,7 +216,7 @@ ArithmeticExpression arithmetic_variable_to_expression(ArithmeticVariable variab
     };
 }
 
-void solve_arithmetic_constraints(ArithmeticContext *context) {
+bool solve_arithmetic_constraints(ArithmeticContext *context) {
     // Create full-sized tableau
     auto variable_count = context->variable_count;
 
@@ -271,7 +268,7 @@ void solve_arithmetic_constraints(ArithmeticContext *context) {
 
     auto constraint_variable_indices = (size_t*)allocate(constraint_count * sizeof(size_t));
 
-    solve(
+    if(!solve(
         variable_count,
         constraint_count,
         is_variable_external,
@@ -280,13 +277,20 @@ void solve_arithmetic_constraints(ArithmeticContext *context) {
         constraint_variable_indices,
         constraint_constants,
         constraint_coefficients
-    );
+    )) {
+        deallocate(objective_coefficients);
+        deallocate(constraint_coefficients);
+
+        return false;
+    }
 
     deallocate(objective_coefficients);
     deallocate(constraint_coefficients);
 
     context->solution_variable_indices = constraint_variable_indices;
     context->solution_constants = constraint_constants;
+
+    return true;
 }
 
 float get_arithmetic_variable_value(ArithmeticVariable variable) {

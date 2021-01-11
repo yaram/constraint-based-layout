@@ -44,6 +44,8 @@ struct Container {
     ArithmeticVariable width;
     ArithmeticVariable height;
 
+    bool fit_content;
+
     ContainerStyle *style;
 
     ContainerStyle *default_container_style;
@@ -181,27 +183,7 @@ inline float get_text_width(String text, String font_family, float font_size) {
     );
 }
 
-inline Container *create_container(LayoutContext *context, Container *parent) {
-    Container container {
-        parent,
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr,
-        nullptr
-    };
-
-    auto container_pointer = (Container*)allocate(sizeof(Container));
-    *container_pointer = container;
-
-    append(&context->containers, container_pointer);
-
-    return container_pointer;
-}
+Container *create_container(LayoutContext *context, Container *parent);
 
 inline ArithmeticVariable left(Container *container) {
     return container->x;
@@ -235,24 +217,7 @@ inline ArithmeticExpression vertical_middle(Container *container) {
     return top(container) + height(container) / 2;
 }
 
-inline Label *create_label(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
-    Label label {
-        container,
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        text,
-        font_family,
-        font_size,
-        nullptr
-    };
-
-    auto label_pointer = (Label*)allocate(sizeof(Label));
-    *label_pointer = label;
-
-    append(&context->labels, label_pointer);
-
-    return label_pointer;
-}
+Label *create_label(LayoutContext *context, Container *container, String text, String font_family, float font_size);
 
 inline ArithmeticVariable left(Label *label) {
     return label->x;
@@ -286,26 +251,7 @@ inline ArithmeticExpression vertical_middle(Label *label) {
     return top(label) + height(label) / 2;
 }
 
-inline Button *create_button(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
-    Button button {
-        container,
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        text,
-        font_family,
-        font_size,
-        nullptr
-    };
-
-    auto button_pointer = (Button*)allocate(sizeof(Button));
-    *button_pointer = button;
-
-    append(&context->buttons, button_pointer);
-
-    return button_pointer;
-}
+Button *create_button(LayoutContext *context, Container *container, String text, String font_family, float font_size);
 
 inline ArithmeticVariable left(Button *button) {
     return button->x;
@@ -339,26 +285,7 @@ inline ArithmeticExpression vertical_middle(Button *button) {
     return top(button) + height(button) / 2;
 }
 
-inline TextInput *create_text_input(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
-    TextInput text_input {
-        container,
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        create_new_variable(&context->arithmetic_context),
-        text,
-        font_family,
-        font_size,
-        nullptr
-    };
-
-    auto text_input_pointer = (TextInput*)allocate(sizeof(TextInput));
-    *text_input_pointer = text_input;
-
-    append(&context->text_inputs, text_input_pointer);
-
-    return text_input_pointer;
-}
+TextInput *create_text_input(LayoutContext *context, Container *container, String text, String font_family, float font_size);
 
 inline ArithmeticVariable left(TextInput *text_input) {
     return text_input->x;
@@ -392,4 +319,4 @@ inline ArithmeticExpression vertical_middle(TextInput *text_input) {
     return top(text_input) + height(text_input) / 2;
 }
 
-void perform_layout(LayoutContext *context);
+bool perform_layout(LayoutContext *context);

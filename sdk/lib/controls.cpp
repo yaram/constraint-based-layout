@@ -3,14 +3,140 @@
 bool first_layout = true;
 LayoutContext global_layout_context;
 
+Container *create_container(LayoutContext *context, Container *parent) {
+    Container container {
+        parent,
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        true
+    };
+
+    auto container_pointer = (Container*)allocate(sizeof(Container));
+    *container_pointer = container;
+
+    append(&context->containers, container_pointer);
+
+    return container_pointer;
+}
+
+Label *create_label(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    Label label {
+        container,
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        text,
+        font_family,
+        font_size
+    };
+
+    auto label_pointer = (Label*)allocate(sizeof(Label));
+    *label_pointer = label;
+
+    append(&context->labels, label_pointer);
+
+    return label_pointer;
+}
+
+Button *create_button(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    Button button {
+        container,
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        text,
+        font_family,
+        font_size
+    };
+
+    auto button_pointer = (Button*)allocate(sizeof(Button));
+    *button_pointer = button;
+
+    append(&context->buttons, button_pointer);
+
+    return button_pointer;
+}
+
+TextInput *create_text_input(LayoutContext *context, Container *container, String text, String font_family, float font_size) {
+    TextInput text_input {
+        container,
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        create_new_variable(&context->arithmetic_context),
+        text,
+        font_family,
+        font_size
+    };
+
+    auto text_input_pointer = (TextInput*)allocate(sizeof(TextInput));
+    *text_input_pointer = text_input;
+
+    append(&context->text_inputs, text_input_pointer);
+
+    return text_input_pointer;
+}
+
 static int pack_color(Color color) {
     return (int)(color.red * 0xFF) | (int)(color.green * 0xFF) << 8 | (int)(color.blue * 0xFF) << 16 | (int)(color.alpha * 0xFF) << 24;
 }
 
-void perform_layout(LayoutContext *context) {
+bool perform_layout(LayoutContext *context) {
     clear_controls(pack_color(context->background_color));
 
-    solve_arithmetic_constraints(&context->arithmetic_context);
+    for(auto container : context->containers) {
+        if(container->parent != nullptr && container->parent->fit_content) {
+            container->x >= 0.0f;
+            container->y >= 0.0f;
+
+            container->x + container->width <= container->parent->width;
+            container->y + container->height <= container->parent->height;
+        }
+
+        if(container->fit_content) {
+            arithmetic_minimize(container->width);
+            arithmetic_minimize(container->height);
+        }
+    }
+
+    for(auto label : context->labels) {
+        if(label->container != nullptr && label->container->fit_content) {
+            label->x >= 0.0f;
+            label->y >= 0.0f;
+
+            auto text_width = get_text_width(label->text, label->font_family, label->font_size);
+            auto text_height = label->font_size;
+
+            label->x + text_width <= label->container->width;
+            label->y + text_height <= label->container->height;
+        }
+    }
+
+    for(auto button : context->buttons) {
+        if(button->container != nullptr && button->container->fit_content) {
+            button->x >= 0.0f;
+            button->y >= 0.0f;
+
+            button->x + button->width <= button->container->width;
+            button->y + button->height <= button->container->height;
+        }
+    }
+
+    for(auto text_input : context->text_inputs) {
+        if(text_input->container != nullptr && text_input->container->fit_content) {
+            text_input->x >= 0.0f;
+            text_input->y >= 0.0f;
+
+            text_input->x + text_input->width <= text_input->container->width;
+            text_input->y + text_input->height <= text_input->container->height;
+        }
+    }
+
+    if(!solve_arithmetic_constraints(&context->arithmetic_context)) {
+        return false;
+    }
 
     while(true) {
         auto all_generated = true;
@@ -244,6 +370,8 @@ void perform_layout(LayoutContext *context) {
     global_layout_context = *context;
 
     first_layout = false;
+
+    return true;
 }
 
 extern "C" void button_press_handler(button_t *button) {
