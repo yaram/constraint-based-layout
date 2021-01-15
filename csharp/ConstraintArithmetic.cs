@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using static ConstraintSDK.Solver;
 
@@ -174,24 +174,38 @@ namespace ConstraintSDK.ConstraintArithmetic {
         // Expression-Expression operators
 
         public static ArithmeticExpression operator +(ArithmeticExpression a, ArithmeticExpression b) {
-            var Context = a.Context;
+            var context = a.Context;
+
+            int aCoefficentCount;
+            if(a.Coefficients != null) {
+                aCoefficentCount = a.Coefficients.Length;
+            } else { 
+                aCoefficentCount = 0;
+            }
+
+            int bCoefficentCount;
+            if(b.Coefficients != null) {
+                bCoefficentCount = b.Coefficients.Length;
+            } else { 
+                bCoefficentCount = 0;
+            }
 
             float[] coefficients;
-            if(a.Coefficients.Length > b.Coefficients.Length) {
-                for(var i = 0; i < a.Coefficients.Length; i += 1) {
+            if(aCoefficentCount > bCoefficentCount) {
+                for(var i = 0; i < bCoefficentCount; i += 1) {
                     a.Coefficients[i] += b.Coefficients[i];
                 }
 
                 coefficients = a.Coefficients;
             } else {
-                for(var i = 0; i < b.Coefficients.Length; i += 1) {
+                for(var i = 0; i < aCoefficentCount; i += 1) {
                     b.Coefficients[i] += a.Coefficients[i];
                 }
 
                 coefficients = b.Coefficients;
             }
 
-            return new ArithmeticExpression(Context, a.Constant + b.Constant, coefficients);
+            return new ArithmeticExpression(context, a.Constant + b.Constant, coefficients);
         }
 
         public static ArithmeticExpression operator -(ArithmeticExpression expression) {
