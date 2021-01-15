@@ -53,6 +53,8 @@ namespace ConstraintSDK.Controls {
         public ArithmeticExpression HorizontalMiddle { get { return Left + Width / 2; } }
         public ArithmeticExpression VerticalMiddle { get { return Top + Height / 2; } }
 
+        public bool FitContent = true;
+
         public Style LocalStyle = null;
 
         public Container.Style DefaultContainerStyle = null;
@@ -300,12 +302,68 @@ namespace ConstraintSDK.Controls {
 
         public event Action<float, float> FrameResize = null;
 
-        public void PerformLayout() {
+        public bool PerformLayout() {
             clear_controls(BackgroundColor.Pack());
 
-            ArithmeticContext.Solve();
+            foreach(var container in Containers) {
+                if(container.Parent != null && container.Parent.FitContent) {
+                    AddConstraints(
+                        container.Left >= 0.0f,
+                        container.Top >= 0.0f,
 
-            
+                        container.Left + container.Width <= container.Parent.Width,
+                        container.Top + container.Height <= container.Parent.Height
+                    );
+                }
+
+                if(container.FitContent) {
+                    Minimize(container.Width);
+                    Minimize(container.Height);
+                }
+            }
+
+            foreach(var label in Labels) {
+                if(label.Container != null && label.Container.FitContent) {
+                    var textWidth = GetTextWidth(label.Text, label.FontFamily, label.FontSize);
+                    var textHeight = label.FontSize;
+
+                    AddConstraints(
+                        label.Left >= 0.0f,
+                        label.Top >= 0.0f,
+
+                        label.Left + textWidth <= label.Container.Width,
+                        label.Top + textHeight <= label.Container.Height
+                    );
+                }
+            }
+
+            foreach(var button in Buttons) {
+                if(button.Container != null && button.Container.FitContent) {
+                    AddConstraints(
+                        button.Left >= 0.0f,
+                        button.Top >= 0.0f,
+
+                        button.Left + button.Width <= button.Container.Width,
+                        button.Top + button.Height <= button.Container.Height
+                    );
+                }
+            }
+
+            foreach(var textInput in TextInputs) {
+                if(textInput.Container != null && textInput.Container.FitContent) {
+                    AddConstraints(
+                        textInput.Left >= 0.0f,
+                        textInput.Top >= 0.0f,
+
+                        textInput.Left + textInput.Width <= textInput.Container.Width,
+                        textInput.Top + textInput.Height <= textInput.Container.Height
+                    );
+                }
+            }
+
+            if(!ArithmeticContext.Solve()) {
+                return false;
+            }
 
             while(true) {
                 var allGenerated = true;
@@ -536,10 +594,28 @@ namespace ConstraintSDK.Controls {
             }
 
             GlobalLayoutContext = this;
+
+            return true;
         }
 
         public void AddConstraints(params ArithmeticConstraint[] constraints) {
             ArithmeticContext.AddConstraints(constraints);
+        }
+
+        public void Minimize(ArithmeticExpression expression) {
+            ArithmeticContext.Minimize(expression);
+        }
+
+        public void Maximize(ArithmeticExpression expression) {
+            ArithmeticContext.Maximize(expression);
+        }
+
+        public void Minimize(ArithmeticTerm term) {
+            ArithmeticContext.Minimize(term);
+        }
+
+        public void Maximize(ArithmeticTerm term) {
+            ArithmeticContext.Maximize(term);
         }
 
         public static float GetTextWidth(string text, string fontFamily, float fontSize) {

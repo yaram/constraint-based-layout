@@ -50,9 +50,6 @@ public static class Program {
 
             testLabel.Top == 0,
 
-            content.Width == incrementButton.Width * 1,
-            content.Height == testTextInput.Bottom - testLabel.Top,
-
             testTextInput.Width == FrameWidth / 3,
             testTextInput.Height == testTextInput.FontSize+ padding * 2,
 

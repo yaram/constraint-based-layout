@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using static ConstraintSDK.Solver;
 
@@ -43,16 +43,7 @@ namespace ConstraintSDK.ConstraintArithmetic {
             switch(inequality) {
                 case ArithmeticInequality.Equal: break;
 
-                case ArithmeticInequality.LessThanOrEqual: {
-                    var slackVariable = context.Variables.Count;
-
-                    context.Variables.Add(false);
-
-                    Array.Resize(ref left.Coefficients, context.Variables.Count);
-
-                    left.Coefficients[slackVariable] = 1.0f;
-                } break;
-
+                case ArithmeticInequality.LessThanOrEqual:
                 case ArithmeticInequality.GreaterThanOrEqual: {
                     var slackVariable = context.Variables.Count;
 
@@ -60,7 +51,20 @@ namespace ConstraintSDK.ConstraintArithmetic {
 
                     Array.Resize(ref left.Coefficients, context.Variables.Count);
 
-                    left.Coefficients[slackVariable] = -1.0f;
+                    float slackCoefficient;
+                    switch(inequality) {
+                        case ArithmeticInequality.LessThanOrEqual: {
+                            slackCoefficient = 1.0f;
+                        } break;
+
+                        case ArithmeticInequality.GreaterThanOrEqual: {
+                            slackCoefficient = -1.0f;
+                        } break;
+
+                        default: throw new Exception();
+                    }
+
+                    left.Coefficients[slackVariable] = slackCoefficient;
                 } break;
             }
 
@@ -71,7 +75,7 @@ namespace ConstraintSDK.ConstraintArithmetic {
             Constraints.AddRange(constraints);
         }
 
-        public void Solve() {
+        public bool Solve() {
             // Create full-sized tableau
             var objectiveConstant = Objective.Constant;
             var objectiveCoefficients = new float[Variables.Count];
@@ -108,7 +112,7 @@ namespace ConstraintSDK.ConstraintArithmetic {
             var constraintVariableIndices = new UIntPtr[Constraints.Count];
 
             // Run solver
-            solve(
+            if(!solve(
                 (UIntPtr)Variables.Count,
                 (UIntPtr)Constraints.Count,
                 Variables.ToArray(),
@@ -117,7 +121,9 @@ namespace ConstraintSDK.ConstraintArithmetic {
                 constraintVariableIndices,
                 constraintConstants,
                 constraintCoefficients
-            );
+            )) {
+                return false;
+            }
 
             // Extract variable values from solution
             SolutionVariableIndices = new int[Constraints.Count];
@@ -127,6 +133,8 @@ namespace ConstraintSDK.ConstraintArithmetic {
             }
 
             SolutionConstants = constraintConstants;
+
+            return true;
         }
 
         public void Minimize(ArithmeticExpression expression) {
@@ -138,11 +146,11 @@ namespace ConstraintSDK.ConstraintArithmetic {
         }
 
         public void Minimize(ArithmeticTerm term) {
-            Minimize(term);
+            Minimize((ArithmeticExpression)term);
         }
 
         public void Maximize(ArithmeticTerm term) {
-            Maximize(term);
+            Maximize((ArithmeticExpression)term);
         }
     }
 
